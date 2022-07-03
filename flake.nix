@@ -56,7 +56,6 @@
 
         checkBuildInputs = with pkgs; [
           docker-client
-          docker-compose
         ];
 
 
