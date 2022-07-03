@@ -1,7 +1,7 @@
 DEV_ENV_PATH=build/dev
 DOCKER_DEV_ENV_PATH=$(DEV_ENV_PATH)/docker
-GITHUB_REF_NAME?="0.0.0-dev"
-VERSION=$(shell echo $(GITHUB_REF_NAME) | sed -e 's/^v//g' -e 's/\//_/g')
+VER?="0.0.0-dev"
+VERSION=$(shell echo $(VER) | sed -e 's/^v//g' -e 's/\//_/g')
 
 
 .PHONY: help
@@ -86,12 +86,12 @@ dev-jwt:  ## return a jwt valid for development environment
 
 .PHONY: dev-s3-access-key
 dev-s3-access-key:  ## return s3 access key for development environment
-	@docker exec -i docker-minio-1 bash -c 'echo $$MINIO_ROOT_USER'
+	@docker exec -i hasura-storage-tests-minio bash -c 'echo $$MINIO_ROOT_USER'
 
 
 .PHONY: dev-s3-secret-key
 dev-s3-secret-key:  ## restun s3 secret key for development environment
-	@docker exec -i docker-minio-1 bash -c 'echo $$MINIO_ROOT_PASSWORD'
+	@docker exec -i hasura-storage-tests-minio bash -c 'echo $$MINIO_ROOT_PASSWORD'
 
 
 .PHONY: migrations-add
