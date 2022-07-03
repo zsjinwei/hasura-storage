@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e
+
 which nix > /dev/null
 
 if [ $? -eq 0 ]; then

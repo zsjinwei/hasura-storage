@@ -1,35 +1,7 @@
+include ./build/common/Makefile
+
 DEV_ENV_PATH=build/dev
 DOCKER_DEV_ENV_PATH=$(DEV_ENV_PATH)/docker
-VER?="0.0.0-dev"
-VERSION=$(shell echo $(VER) | sed -e 's/^v//g' -e 's/\//_/g')
-
-
-.PHONY: help
-help: ## Show this help.
-	@IFS=$$'\n' ; \
-	lines=(`fgrep -h "##" $(MAKEFILE_LIST) | fgrep -v fgrep | sed -e 's/\\$$//'`); \
-	for line in $${lines[@]}; do \
-		IFS=$$'#' ; \
-		split=($$line) ; \
-		command=`echo $${split[0]} | sed -e 's/^ *//' -e 's/ *$$//'` ; \
-		info=`echo $${split[2]} | sed -e 's/^ *//' -e 's/ *$$//'` ; \
-		printf "%-38s %s\n" $$command $$info ; \
-	done
-
-
-.PHONY: get-version
-get-version:  ## Return version
-	@echo $(VERSION) > VERSION
-	@echo $(VERSION)
-
-
-.PHONY: tests
-tests:  dev-env-up check  ## Spin environment and run nix flake check
-
-
-.PHONY: check
-check:   ## Run nix flake check
-	./build/nix.sh flake check --print-build-logs
 
 
 .PHONY: integration-tests
@@ -41,19 +13,6 @@ integration-tests: ## Run go test with integration flags
 		richgo test -tags=integration $(GOTEST_OPTIONS) ./...   # -run=TestGetFileByID
 
 
-.PHONY: build
-build:  ## Build application and places the binary under ./result/bin
-	@echo $(VERSION) > VERSION
-	./build/nix.sh build --print-build-logs
-
-
-.PHONY: build-docker-image
-build-docker-image:  ## Build docker container for native architecture
-	@echo $(VERSION) > VERSION
-	./build/nix-docker-image.sh
-	docker tag hasura-storage:$(VERSION) hasura-storage:dev
-
-
 .PHONY: dev-env-up-short
 dev-env-up-short:  ## Starts development environment without hasura-storage
 	docker-compose -f ${DOCKER_DEV_ENV_PATH}/docker-compose.yaml up -d postgres graphql-engine minio
@@ -63,18 +22,20 @@ dev-env-up-short:  ## Starts development environment without hasura-storage
 dev-env-up-hasura: build-docker-image  ## Starts development environment but only hasura-storage
 	docker-compose -f ${DOCKER_DEV_ENV_PATH}/docker-compose.yaml up -d storage
 
-.PHONY: dev-env-up
-dev-env-up: dev-env-down dev-env-build  ## Starts development environment
+
+.PHONY: _dev-env-up
+_dev-env-up:
 	docker-compose -f ${DOCKER_DEV_ENV_PATH}/docker-compose.yaml up -d
 
 
-.PHONY: dev-env-down
-dev-env-down:  ## Stops development environment
+.PHONY: _dev-env-down
+_dev-env-down:
 	docker-compose -f ${DOCKER_DEV_ENV_PATH}/docker-compose.yaml down
 
 
-.PHONY: dev-env-build
-dev-env-build: build-docker-image  ## Builds development environment
+.PHONY: _dev-env-build
+_dev-env-build: build-docker-image
+	docker tag $(NAME):$(VERSION) $(NAME):dev
 	docker-compose -f ${DOCKER_DEV_ENV_PATH}/docker-compose.yaml build
 
 
