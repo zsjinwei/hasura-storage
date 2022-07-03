@@ -6,16 +6,16 @@ on:
 
 jobs:
   tests:
-    uses: dbarrosop/nix-common/.github/workflows/z_test.yaml@dbarroso/hasura-storage
+    uses: dbarrosop/nix-common/.github/workflows/go_test.yaml@dbarroso/hasura-storage
 
   build_docker_image:
-    uses: dbarrosop/nix-common/.github/workflows/z_docker_build_image.yaml@dbarroso/hasura-storage
+    uses: dbarrosop/nix-common/.github/workflows/docker_build_image.yaml@dbarroso/hasura-storage
     with:
       NAME: hasura-storage
       VERSION: ${{ github.ref_name }}
 
   push_docker_image_to_hub:
-    uses: dbarrosop/nix-common/.github/workflows/z_docker_push_to_hub.yaml@dbarroso/hasura-storage
+    uses: dbarrosop/nix-common/.github/workflows/docker_push_to_hub.yaml@dbarroso/hasura-storage
     needs: build_docker_image
     with:
       CONTAINER_NAME: nhost/hasura-storage
@@ -25,7 +25,7 @@ jobs:
       DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
 
   push_docker_image_to_ecr:
-    uses: dbarrosop/nix-common/.github/workflows/z_docker_push_to_ecr.yaml@dbarroso/hasura-storage
+    uses: dbarrosop/nix-common/.github/workflows/docker_push_to_ecr.yaml@dbarroso/hasura-storage
     needs: build_docker_image
     with:
       NAME: hasura-storage
