@@ -23,6 +23,16 @@ jobs:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
 
+  push_docker_image_to_ecr:
+    uses: dbarrosop/nix-common/.github/workflows/z_docker_push_to_ecr.yaml@dbarroso/hasura-storage
+    needs: build_docker_image
+    with:
+      NAME: hasura-storage
+      VERSION: ${{ github.ref_name }}-${{ github.sha }}
+      AWS_REGION: eu-central-1
+    secrets:
+      AWS_ACCOUNT_ID: ${{ secrets.AWS_PRODUCTION_ACCOUNT_ID }}
+
   # draft your next release notes as pull requests are merged into "main"
   # the configuration is at /.github/release-drafter.yml.
   update_release_draft:
