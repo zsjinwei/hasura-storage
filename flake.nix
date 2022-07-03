@@ -2,18 +2,35 @@
   description = "Nhost Hasura Storage";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/master";
+    nix-common.url = "github:dbarrosop/nix-common/dbarroso/hasura-storage";
     nix-filter.url = "github:numtide/nix-filter";
     flake-utils.url = "github:numtide/flake-utils";
   };
 
-  outputs = { self, nixpkgs, flake-utils, nix-filter }:
+  outputs = { self, nix-common, flake-utils, nix-filter }:
     flake-utils.lib.eachDefaultSystem (system:
       let
-        localOverlay = import ./nix/overlay.nix;
-        overlays = [ localOverlay ];
-        pkgs = import nixpkgs {
-          inherit system overlays;
+        name = "hasura-storage";
+        version = pkgs.lib.fileContents ./VERSION;
+        module = "github.com/nhost/hasura-storage";
+
+        pkgs = import nix-common.nixpkgs {
+          inherit system;
+          overlays = nix-common.overlays ++ [
+            (final: prev: rec {
+              vips = prev.vips.overrideAttrs (oldAttrs: rec {
+                buildInputs = [
+                  final.glib
+                  final.libxml2
+                  final.expat
+                  final.libjpeg
+                  final.libpng
+                  final.libwebp
+                  final.openjpeg
+                ];
+              });
+            })
+          ];
         };
 
         go-src = nix-filter.lib.filter {
@@ -37,79 +54,29 @@
           pkg-config
         ];
 
-        name = "hasura-storage";
-        version = nixpkgs.lib.fileContents ./VERSION;
-        module = "github.com/nhost/hasura-storage";
+        checkBuildInputs = with pkgs; [
+          docker-client
+          docker-compose
+        ];
 
-        tags = "integration";
 
-        ldflags = ''
-          -X ${module}/controller.buildVersion=${version} \
-        '';
+        ldflags = [
+          "-X ${module}/controller.buildVersion=${version}"
+        ];
+
+        tags = [ "integration" ];
 
       in
       {
-        checks = {
-          nixpkgs-fmt = pkgs.runCommand "check-nixpkgs-fmt"
-            {
-              nativeBuildInputs = with pkgs;
-                [
-                  nixpkgs-fmt
-                ];
-            }
-            ''
-              mkdir $out
-              nixpkgs-fmt --check ${nix-src}
-            '';
+        checks = nix-common.checks.go {
+          inherit pkgs buildInputs nativeBuildInputs checkBuildInputs tags ldflags go-src nix-src;
 
-          golangci-lint = pkgs.runCommand "golangci-lint"
-            {
-              nativeBuildInputs = with pkgs; [
-                clang
-                golangci-lint
-              ] ++ buildInputs ++ nativeBuildInputs;
-            }
-            ''
-              export GOLANGCI_LINT_CACHE=$TMPDIR/.cache/golangci-lint
-              export GOCACHE=$TMPDIR/.cache/go-build
-              export GOMODCACHE="$TMPDIR/.cache/mod"
-
-              mkdir $out
-              cd $out
-              cp -r ${go-src}/* .
-
-              golangci-lint run \
-                --build-tags=${tags} \
-                --timeout 300s
-            '';
-
-          gotests = pkgs.runCommand "gotests"
-            {
-              nativeBuildInputs = with pkgs; [
-                docker-client
-                docker-compose
-                richgo
-              ] ++ buildInputs ++ nativeBuildInputs;
-            }
-            ''
-              export GOCACHE=$TMPDIR/.cache/go-build
-              export GOMODCACHE="$TMPDIR/.cache/mod"
-
-              mkdir $out
-              cd $out
-              cp -r ${go-src}/* .
-
-              export HASURA_AUTH_BEARER=$(make dev-jwt)
-              export TEST_S3_ACCESS_KEY=$(make dev-s3-access-key)
-              export TEST_S3_SECRET_KEY=$(make dev-s3-secret-key)
-              export GIN_MODE=release
-
-              go test \
-                -tags=${tags} \
-                -ldflags="${ldflags}" \
-                -v ./...
-            '';
-
+          preCheck = ''
+            export HASURA_AUTH_BEARER=$(make dev-jwt)
+            export TEST_S3_ACCESS_KEY=$(make dev-s3-access-key)
+            export TEST_S3_SECRET_KEY=$(make dev-s3-secret-key)
+            export GIN_MODE=release
+          '';
         };
 
         devShells = flake-utils.lib.flattenTree rec {
@@ -128,45 +95,52 @@
           };
         };
 
-        packages = flake-utils.lib.flattenTree rec {
-          hasuraStorage = pkgs.callPackage ./nix/hasura-storage.nix {
-            inherit name version ldflags tags buildInputs nativeBuildInputs;
-          };
+        packages = flake-utils.lib.flattenTree
+          rec {
+            hasura-storage = pkgs.buildGoModule {
+              inherit version ldflags buildInputs nativeBuildInputs;
 
-          dockerImage = pkgs.dockerTools.buildLayeredImage {
-            name = name;
-            tag = version;
-            created = "now";
-            contents = [
-              pkgs.cacert
-            ] ++ buildInputs;
-            config = {
-              Env = [
-                "TMPDIR=/"
-                "MALLOC_ARENA_MAX=2"
-              ];
-              Entrypoint = [
-                "${self.packages.${system}.hasuraStorage}/bin/hasura-storage"
-              ];
+              pname = name;
+
+              src = go-src;
+
+              vendorSha256 = null;
+
+              doCheck = false;
+
+              subPackages = [ "." ];
+
+              meta = with pkgs.lib; {
+                description = "Hasura Storage is awesome";
+                homepage = "https://github.com/nhost/hasura-storage";
+                license = licenses.mit;
+                maintainers = [ "nhost" ];
+                platforms = platforms.linux ++ platforms.darwin;
+              };
             };
+
+            docker-image = pkgs.dockerTools.buildLayeredImage {
+              inherit name;
+              tag = version;
+              created = "now";
+
+              contents = [
+                pkgs.cacert
+              ] ++ buildInputs;
+              config = {
+                Env = [
+                  "TMPDIR=/"
+                  "MALLOC_ARENA_MAX=2"
+                ];
+                Entrypoint = [
+                  "${self.packages.${system}.hasura-storage}/bin/hasura-storage"
+                ];
+              };
+            };
+
+            default = hasura-storage;
+
           };
-
-          default = hasuraStorage;
-
-        };
-
-        apps = flake-utils.lib.flattenTree {
-          hasuraStorage = self.packages.${system}.hasuraStorage;
-          golangci-lint = pkgs.golangci-lint;
-        };
-
-        defaultApp = self.packages.${system}.hasuraStorage;
-
       }
-
-
-
     );
-
-
 }

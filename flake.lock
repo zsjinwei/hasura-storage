@@ -2,11 +2,11 @@
   "nodes": {
     "flake-utils": {
       "locked": {
-        "lastModified": 1649676176,
-        "narHash": "sha256-OWKJratjt2RW151VUlJPRALb7OU2S5s+f0vLj4o1bHM=",
+        "lastModified": 1656065134,
+        "narHash": "sha256-oc6E6ByIw3oJaIyc67maaFcnjYOz1mMcOtHxbEf9NwQ=",
         "owner": "numtide",
         "repo": "flake-utils",
-        "rev": "a4b154ebbdc88c8498a5c7b01589addc9e9cb678",
+        "rev": "bee6a7250dd1b01844a2de7e02e4df7d8a0a206c",
         "type": "github"
       },
       "original": {
@@ -15,13 +15,32 @@
         "type": "github"
       }
     },
+    "nix-common": {
+      "inputs": {
+        "nixpkgs": "nixpkgs"
+      },
+      "locked": {
+        "lastModified": 1656855435,
+        "narHash": "sha256-2i4H2/H1R9gAV4CkUbzqLulR0OEeJEYUSHpbKdyL9Jg=",
+        "owner": "dbarrosop",
+        "repo": "nix-common",
+        "rev": "602ffb33b63ace246988f71005fc9bd87074e3ac",
+        "type": "github"
+      },
+      "original": {
+        "owner": "dbarrosop",
+        "ref": "dbarroso/hasura-storage",
+        "repo": "nix-common",
+        "type": "github"
+      }
+    },
     "nix-filter": {
       "locked": {
-        "lastModified": 1649838635,
-        "narHash": "sha256-P1h48+l9vUvMz4JwHBgkTXiX6mE8oYR75vBVUbe6Cuc=",
+        "lastModified": 1653590866,
+        "narHash": "sha256-E4yKIrt/S//WfW5D9IhQ1dVuaAy8RE7EiCMfnbrOC78=",
         "owner": "numtide",
         "repo": "nix-filter",
-        "rev": "40a58baa248a8b335e2d66ca258a74248af9d834",
+        "rev": "3e81a637cdf9f6e9b39aeb4d6e6394d1ad158e16",
         "type": "github"
       },
       "original": {
@@ -32,25 +51,25 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1651910749,
-        "narHash": "sha256-p/7b2PIP3D+J+X+5SKvgas50w06l8Rx6vpuuSFOZuk0=",
-        "owner": "nixos",
+        "lastModified": 1656628719,
+        "narHash": "sha256-Ot9XWRWjWJ2bh2Rm7P9llCmBaQVSDIQJ+F1PMHE8XH0=",
+        "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "15dab8cb52f2d98adc4ad2e4958d3abc1fe0849e",
+        "rev": "e47f1d2527f6109ea74940f01fcfe168a00bc5f7",
         "type": "github"
       },
       "original": {
-        "owner": "nixos",
-        "ref": "master",
+        "owner": "NixOS",
         "repo": "nixpkgs",
+        "rev": "e47f1d2527f6109ea74940f01fcfe168a00bc5f7",
         "type": "github"
       }
     },
     "root": {
       "inputs": {
         "flake-utils": "flake-utils",
-        "nix-filter": "nix-filter",
-        "nixpkgs": "nixpkgs"
+        "nix-common": "nix-common",
+        "nix-filter": "nix-filter"
       }
     }
   },
