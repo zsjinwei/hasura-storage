@@ -11,14 +11,14 @@ jobs:
     uses: dbarrosop/nix-common/.github/workflows/docker_build_image.yaml@dbarroso/hasura-storage
     with:
       NAME: hasura-storage
-      VERSION: ${{ github.ref_name }}-${{ github.sha }}
+      VERSION: ${{ github.sha }}
 
   push_docker_image_to_hub:
     uses: dbarrosop/nix-common/.github/workflows/docker_push_to_hub.yaml@dbarroso/hasura-storage
     needs: build_docker_image
     with:
       CONTAINER_NAME: nhost/hasura-storage
-      VERSION: ${{ github.ref_name }}-${{ github.sha }}
+      VERSION: ${{ github.sha }}
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
@@ -28,7 +28,7 @@ jobs:
     needs: build_docker_image
     with:
       NAME: hasura-storage
-      VERSION: ${{ github.ref_name }}-${{ github.sha }}
+      VERSION: ${{ github.sha }}
       AWS_REGION: eu-central-1
     secrets:
       AWS_ACCOUNT_ID: ${{ secrets.AWS_PRODUCTION_ACCOUNT_ID }}
