@@ -13,6 +13,16 @@ jobs:
       NAME: hasura-storage
       VERSION: ${{ github.ref_name }}-${{ github.sha }}
 
+  push_docker_image_to_hub:
+    uses: dbarrosop/nix-common/.github/workflows/z_docker_push_to_hub.yaml@dbarroso/hasura-storage
+    needs: build_docker_image
+    with:
+      CONTAINER_NAME: nhost/hasura-storage
+      VERSION: ${{ github.ref_name }}-${{ github.sha }}
+    secrets:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+
   # draft your next release notes as pull requests are merged into "main"
   # the configuration is at /.github/release-drafter.yml.
   update_release_draft:
