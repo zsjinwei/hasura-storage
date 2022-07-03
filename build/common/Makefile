@@ -58,12 +58,12 @@ build-docker-image:  ## Build docker container for native architecture
 
 
 .PHONY: dev-env-up
-dev-env-up: dev-env-down _dev-env-build _dev_env_up ## Starts development environment
+dev-env-up: dev-env-down _dev-env-build _dev-env-up ## Starts development environment
 
 
 .PHONY: dev-env-down
-dev-env-down: _dev_env_down  ## Stops development environment
+dev-env-down: _dev-env-down  ## Stops development environment
 
 
 .PHONY: dev-env-build
-dev-env-build: _dev-env_build  ## Builds development environment
+dev-env-build: _dev-env-build  ## Builds development environment
