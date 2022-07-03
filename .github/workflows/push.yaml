@@ -5,13 +5,13 @@ on:
   - pull_request
 jobs:
   tests:
-    uses: dbarrosop/nix-common/.github/workflows/z_test.yaml@hasura-storage
+    uses: dbarrosop/nix-common/.github/workflows/z_test.yaml@dbarroso/hasura-storage
 
-  # build_docker_image:
-  #   uses: dbarrosop/nix-common/.github/workflows/z_docker_build_image.yaml@hasura-storage
-  #   with:
-  #     NAME: hasura-storage
-  #     VERSION: ${{ github.ref_name }}-${{ github.sha }}
+  build_docker_image:
+    uses: dbarrosop/nix-common/.github/workflows/z_docker_build_image.yaml@dbarroso/hasura-storage
+    with:
+      NAME: hasura-storage
+      VERSION: ${{ github.ref_name }}-${{ github.sha }}
 
   # draft your next release notes as pull requests are merged into "main"
   # the configuration is at /.github/release-drafter.yml.
