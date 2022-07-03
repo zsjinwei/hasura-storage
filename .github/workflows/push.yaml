@@ -1,10 +1,27 @@
 ---
-name: Run tests and linters
+name: Push workflow
 on:
   - push
   - pull_request
 jobs:
   tests:
-    uses: nhost/hasura-storage/.github/workflows/test.yaml@main
-    secrets:
-      CACHIX_AUTH_TOKEN: ${{ secrets.CACHIX_AUTH_TOKEN }}
+    uses: dbarroso/nix-common/.github/workflows/z_test.yaml
+
+  build_docker_image:
+    uses: dbarroso/nix-common/.github/workflows/z_docker_build_image.yaml
+    with:
+      NAME: hasura-storage
+      VERSION: ${{ github.ref_name }}-${{ github.sha }}
+
+  # draft your next release notes as pull requests are merged into "master"
+  # the configuration is at /.github/release-drafter.yml.
+  update_release_draft:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: release-drafter/release-drafter@v5
+        if: github.ref_name == github.event.repository.master_branch
+        with:
+          config-name: release-drafter.yml
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
