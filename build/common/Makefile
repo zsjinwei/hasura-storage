@@ -2,6 +2,9 @@ NAME=$(shell basename $(CURDIR))
 VER?="0.0.0-dev"
 VERSION=$(shell echo $(VER) | sed -e 's/^v//g' -e 's/\//_/g')
 
+CONTAINER_REGISTRY?="nhost"
+CONTAINER_NAME=$(CONTAINER_REGISTRY)/$(NAME)
+
 ifeq ($(shell uname -m),x86_64)
   ARCH=x86_64
 else ifeq ($(shell uname -m),arm64)
@@ -67,3 +70,18 @@ dev-env-down: _dev-env-down  ## Stops development environment
 
 .PHONY: dev-env-build
 dev-env-build: _dev-env-build  ## Builds development environment
+
+
+.PHONY: _push-docker-image
+_push-docker-image:
+	docker load < ~/artifacts/docker-image-x86_64-$(VERSION)/result
+	docker tag $(NAME):$(VERSION)-x86_64 $(CONTAINER_NAME):$(VERSION)-x86_64
+	docker push $(CONTAINER_NAME):$(VERSION)-x86_64
+	docker load < ~/artifacts/docker-image-aarch64-$(VERSION)/result
+	docker tag $(NAME):$(VERSION) $(CONTAINER_NAME):$(VERSION)-aarch64
+	docker push $(CONTAINER_NAME):$(VERSION)-aarch64
+	docker manifest create \
+	  $(CONTAINER_NAME):$(VERSION) \
+	  --amend $(CONTAINER_NAME):$(VERSION)-x86_64 \
+	  --amend $(CONTAINER_NAME):$(VERSION)-aarch64
+	docker manifest push $(CONTAINER_NAME):$(VERSION)

@@ -10,14 +10,12 @@ jobs:
   build_docker_image:
     uses: dbarrosop/nix-common/.github/workflows/docker_build_image.yaml@dbarroso/hasura-storage
     with:
-      NAME: hasura-storage
       VERSION: ${{ github.sha }}
 
   push_docker_image_to_hub:
     uses: dbarrosop/nix-common/.github/workflows/docker_push_to_hub.yaml@dbarroso/hasura-storage
     needs: build_docker_image
     with:
-      CONTAINER_NAME: nhost/hasura-storage
       VERSION: ${{ github.sha }}
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}

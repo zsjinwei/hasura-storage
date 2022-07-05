@@ -3,20 +3,24 @@
 
   inputs = {
     nix-common.url = "github:dbarrosop/nix-common/dbarroso/hasura-storage";
-    nix-filter.url = "github:numtide/nix-filter";
+    nixpkgs = {
+      inputs.nixpkgs.follows = "nix-common/nixpkgs";
+    };
     flake-utils.url = "github:numtide/flake-utils";
+    nix-filter.url = "github:numtide/nix-filter";
   };
 
-  outputs = { self, nix-common, flake-utils, nix-filter }:
+  outputs = { self, nix-common, nixpkgs, flake-utils, nix-filter }:
     flake-utils.lib.eachDefaultSystem (system:
       let
         name = "hasura-storage";
         version = pkgs.lib.fileContents ./VERSION;
         module = "github.com/nhost/hasura-storage";
 
-        pkgs = import nix-common.nixpkgs {
+        pkgs = import nixpkgs {
           inherit system;
-          overlays = nix-common.overlays ++ [
+          overlays = [
+            nix-common.overlays.default
             (final: prev: rec {
               vips = prev.vips.overrideAttrs (oldAttrs: rec {
                 buildInputs = [
