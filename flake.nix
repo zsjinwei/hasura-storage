@@ -71,7 +71,7 @@
 
       in
       {
-        checks = nix-common.checks.go {
+        checks = nix-common.reusableChecks.go {
           inherit pkgs buildInputs nativeBuildInputs checkBuildInputs tags ldflags go-src nix-src;
 
           preCheck = ''
