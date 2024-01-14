@@ -10,7 +10,6 @@ import (
 	"fmt"
 	"io"
 	"math"
-	"reflect"
 	"runtime/debug"
 	"sync"
 	"sync/atomic"
@@ -60,7 +59,7 @@ func NewTransformer() *Transformer {
 			panic(fmt.Sprintf("vips error, code=%v", err))
 		}
 
-		C.vips_concurrency_set(C.int(1))
+		C.vips_concurrency_set(C.int(0))
 		C.vips_cache_set_max_files(C.int(0))
 		C.vips_cache_set_max_mem(C.size_t(0))
 		C.vips_cache_set_max(C.int(0))
@@ -79,6 +78,10 @@ func NewTransformer() *Transformer {
 			},
 		},
 	}
+}
+
+func (t *Transformer) VipsLeakSet() {
+	C.vips_leak_set(C.TRUE)
 }
 
 func (t *Transformer) Shutdown() {
@@ -142,11 +145,6 @@ func Manipulate(buf []byte, opts Options) ([]byte, error) {
 		return nil, fmt.Errorf("%v\nStack:\n%s", s, debug.Stack()) //nolint: goerr113
 	}
 
-	var data []byte
-	sh := (*reflect.SliceHeader)(unsafe.Pointer(&data))
-	sh.Data = uintptr(result.buf)
-	sh.Len = int(result.len)
-	sh.Cap = int(result.len)
-
+	data := unsafe.Slice((*byte)(result.buf), int(result.len))
 	return data, nil
 }

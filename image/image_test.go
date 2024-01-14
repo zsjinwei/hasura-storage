@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/nhost/hasura-storage/image"
@@ -94,21 +95,26 @@ func TestManipulate(t *testing.T) {
 
 func BenchmarkManipulate(b *testing.B) {
 	transformer := image.NewTransformer()
-	orig, err := os.Open("testdata/nhost.jpg")
+	transformer.VipsLeakSet()
+	defer transformer.Shutdown()
+
+	orig, err := os.Open("/Users/dbarroso/Downloads/asd.jpg")
 	if err != nil {
 		b.Fatal(err)
 	}
 	defer orig.Close()
-	for i := 0; i < 100; i++ {
+	for i := 0; i < 1; i++ {
 		_, _ = orig.Seek(0, 0)
 
 		if err := transformer.Run(
 			orig,
 			33399,
 			io.Discard,
-			image.Options{Width: 300, Height: 100, Blur: 1.5, Format: image.ImageTypeJPEG},
+			image.Options{Width: 300 + i, Height: 100, Blur: 1.5, Format: image.ImageTypeJPEG},
 		); err != nil {
 			b.Fatal(err)
 		}
 	}
+
+	time.Sleep(1 * time.Second)
 }
