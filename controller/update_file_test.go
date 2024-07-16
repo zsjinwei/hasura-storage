@@ -99,6 +99,9 @@ func TestUpdateFile(t *testing.T) {
 					IsUploaded:       true,
 					MimeType:         "text/plain; charset=utf-8",
 					UploadedByUserID: "some-valid-uuid",
+					ObjectKey:        file.md.ID,
+					ChunkSize:        int64(len(file.contents)),
+					ChunkCount:       int64(1),
 				},
 				nil,
 			)
@@ -139,6 +142,9 @@ func TestUpdateFile(t *testing.T) {
 				"some-etag",
 				true,
 				"text/plain; charset=utf-8",
+				file.md.ID,
+				int64(len(file.contents)),
+				int64(1),
 				file.md.Metadata,
 				gomock.Any(),
 			).Return(
@@ -154,6 +160,9 @@ func TestUpdateFile(t *testing.T) {
 					MimeType:         "text/plain; charset=utf-8",
 					UploadedByUserID: "some-valid-uuid",
 					Metadata:         map[string]any{"some": "metadata"},
+					ObjectKey:        file.md.ID,
+					ChunkSize:        int64(len(file.contents)),
+					ChunkCount:       int64(1),
 				},
 				nil)
 
@@ -208,6 +217,9 @@ func TestUpdateFile(t *testing.T) {
 					MimeType:         "text/plain; charset=utf-8",
 					UploadedByUserID: "some-valid-uuid",
 					Metadata:         map[string]any{"some": "metadata"},
+					ObjectKey:        file.md.ID,
+					ChunkSize:        int64(len(file.contents)),
+					ChunkCount:       int64(1),
 				},
 				nil,
 			}, resp,

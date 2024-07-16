@@ -119,6 +119,9 @@ func TestGetFileInfo(t *testing.T) {
 				IsUploaded:       true,
 				MimeType:         "text/plain; charset=utf-8",
 				UploadedByUserID: "0f7f0ff0-f945-4597-89e1-3636b16775cd",
+				ObjectKey:        "55af1e60-0f28-454e-885e-ea6aab2bb288",
+				ChunkSize:        64,
+				ChunkCount:       1,
 			}, nil)
 
 			metadataStorage.EXPECT().GetBucketByID(

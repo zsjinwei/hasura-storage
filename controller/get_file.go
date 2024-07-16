@@ -216,8 +216,13 @@ func (ctrl *Controller) getFileProcess(ctx *gin.Context) (*FileResponse, *APIErr
 		return nil, apiErr
 	}
 
+	filePath := fileMetadata.ID
+	if len(fileMetadata.ObjectKey) > 0 {
+		filePath = fileMetadata.ObjectKey
+	}
+
 	downloadFunc := func() (*File, *APIError) {
-		return ctrl.contentStorage.GetFile(ctx, fileMetadata.ID, ctx.Request.Header)
+		return ctrl.contentStorage.GetFile(ctx, filePath, ctx.Request.Header)
 	}
 
 	response, apiErr := ctrl.processFileToDownload(

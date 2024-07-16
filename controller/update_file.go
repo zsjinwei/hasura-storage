@@ -109,7 +109,12 @@ func (ctrl *Controller) updateFile(ctx *gin.Context) (FileMetadata, *APIError) {
 		return FileMetadata{}, err
 	}
 
-	etag, apiErr := ctrl.contentStorage.PutFile(ctx, fileContent, file.ID, contentType)
+	objectKey := originalMetadata.ObjectKey
+	if objectKey == "" {
+		objectKey = file.ID
+	}
+
+	etag, apiErr := ctrl.contentStorage.PutFile(ctx, fileContent, objectKey, contentType)
 	if apiErr != nil {
 		// let's revert the change to isUploaded
 		_ = ctrl.metadataStorage.SetIsUploaded(ctx, file.ID, true, ctx.Request.Header)
@@ -119,7 +124,7 @@ func (ctrl *Controller) updateFile(ctx *gin.Context) (FileMetadata, *APIError) {
 
 	newMetadata, apiErr := ctrl.metadataStorage.PopulateMetadata(
 		ctx,
-		file.ID, file.Name, file.header.Size, originalMetadata.BucketID, etag, true, contentType,
+		file.ID, file.Name, file.header.Size, originalMetadata.BucketID, etag, true, contentType, objectKey, file.header.Size, 1,
 		file.Metadata,
 		ctx.Request.Header,
 	)

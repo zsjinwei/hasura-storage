@@ -160,6 +160,9 @@ func TestUploadFile(t *testing.T) {
 					int64(len(file.contents)),
 					"blah",
 					"text/plain; charset=utf-8",
+					file.md.ID,
+					int64(len(file.contents)),
+					int64(1),
 					gomock.Any(),
 				).Return(nil)
 
@@ -181,6 +184,9 @@ func TestUploadFile(t *testing.T) {
 					"some-etag",
 					true,
 					"text/plain; charset=utf-8",
+					file.md.ID,
+					int64(len(file.contents)),
+					int64(1),
 					file.md.Metadata,
 					gomock.Any(),
 				).Return(
@@ -196,6 +202,9 @@ func TestUploadFile(t *testing.T) {
 						MimeType:         "text/plain; charset=utf-8",
 						UploadedByUserID: "some-valid-uuid",
 						Metadata:         map[string]any{},
+						ObjectKey:        file.md.ID,
+						ChunkSize:        int64(len(file.contents)),
+						ChunkCount:       1,
 					},
 					nil)
 			}
@@ -210,6 +219,9 @@ func TestUploadFile(t *testing.T) {
 					int64(len(file.contents)),
 					"blah",
 					"text/markdown",
+					file.md.ID,
+					int64(len(file.contents)),
+					int64(1),
 					gomock.Any(),
 				).Return(nil)
 
@@ -231,6 +243,9 @@ func TestUploadFile(t *testing.T) {
 					"some-etag",
 					true,
 					"text/markdown",
+					file.md.ID,
+					int64(len(file.contents)),
+					int64(1),
 					file.md.Metadata,
 					gomock.Any(),
 				).Return(
@@ -246,6 +261,9 @@ func TestUploadFile(t *testing.T) {
 						MimeType:         "text/markdown",
 						UploadedByUserID: "some-valid-uuid",
 						Metadata:         map[string]any{"some": "metadata"},
+						ObjectKey:        file.md.ID,
+						ChunkSize:        int64(len(file.contents)),
+						ChunkCount:       1,
 					},
 					nil)
 			}
@@ -296,6 +314,9 @@ func TestUploadFile(t *testing.T) {
 						MimeType:         "text/plain; charset=utf-8",
 						UploadedByUserID: "some-valid-uuid",
 						Metadata:         map[string]any{},
+						ObjectKey:        resp.ProcessedFiles[0].ObjectKey,
+						ChunkSize:        12,
+						ChunkCount:       int64(1),
 					},
 					{
 						ID:               "d041c7c5-10e7-410e-a599-799409b5",
@@ -309,6 +330,9 @@ func TestUploadFile(t *testing.T) {
 						MimeType:         "text/markdown",
 						UploadedByUserID: "some-valid-uuid",
 						Metadata:         map[string]any{"some": "metadata"},
+						ObjectKey:        resp.ProcessedFiles[1].ObjectKey,
+						ChunkSize:        12,
+						ChunkCount:       int64(1),
 					},
 				},
 				Error: nil,

@@ -14,7 +14,7 @@ import (
 	gomock "go.uber.org/mock/gomock"
 )
 
-func TestGetFile(t *testing.T) {
+func TestDownloadFile(t *testing.T) {
 	t.Parallel()
 
 	cases := getFileTestCases()

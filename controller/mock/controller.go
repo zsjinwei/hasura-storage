@@ -88,17 +88,17 @@ func (mr *MockMetadataStorageMockRecorder) GetFileByID(ctx, id, headers any) *go
 }
 
 // InitializeFile mocks base method.
-func (m *MockMetadataStorage) InitializeFile(ctx context.Context, id, name string, size int64, bucketID, mimeType string, headers http.Header) *controller.APIError {
+func (m *MockMetadataStorage) InitializeFile(ctx context.Context, id, name string, size int64, bucketID, mimeType string, objectKey string, chunkSize int64, chunkCount int64, headers http.Header) *controller.APIError {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "InitializeFile", ctx, id, name, size, bucketID, mimeType, headers)
+	ret := m.ctrl.Call(m, "InitializeFile", ctx, id, name, size, bucketID, mimeType, objectKey, chunkSize, chunkCount, headers)
 	ret0, _ := ret[0].(*controller.APIError)
 	return ret0
 }
 
 // InitializeFile indicates an expected call of InitializeFile.
-func (mr *MockMetadataStorageMockRecorder) InitializeFile(ctx, id, name, size, bucketID, mimeType, headers any) *gomock.Call {
+func (mr *MockMetadataStorageMockRecorder) InitializeFile(ctx, id, name, size, bucketID, mimeType, objectKey, chunkSize, chunkCount, headers any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InitializeFile", reflect.TypeOf((*MockMetadataStorage)(nil).InitializeFile), ctx, id, name, size, bucketID, mimeType, headers)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InitializeFile", reflect.TypeOf((*MockMetadataStorage)(nil).InitializeFile), ctx, id, name, size, bucketID, mimeType, objectKey, chunkSize, chunkCount, headers)
 }
 
 // InsertVirus mocks base method.
@@ -131,18 +131,18 @@ func (mr *MockMetadataStorageMockRecorder) ListFiles(ctx, headers any) *gomock.C
 }
 
 // PopulateMetadata mocks base method.
-func (m *MockMetadataStorage) PopulateMetadata(ctx context.Context, id, name string, size int64, bucketID, etag string, IsUploaded bool, mimeType string, metadata map[string]any, headers http.Header) (controller.FileMetadata, *controller.APIError) {
+func (m *MockMetadataStorage) PopulateMetadata(ctx context.Context, id, name string, size int64, bucketID, etag string, IsUploaded bool, mimeType string, objectKey string, chunkSize int64, chunkCount int64, metadata map[string]any, headers http.Header) (controller.FileMetadata, *controller.APIError) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "PopulateMetadata", ctx, id, name, size, bucketID, etag, IsUploaded, mimeType, metadata, headers)
+	ret := m.ctrl.Call(m, "PopulateMetadata", ctx, id, name, size, bucketID, etag, IsUploaded, mimeType, objectKey, chunkSize, chunkCount, metadata, headers)
 	ret0, _ := ret[0].(controller.FileMetadata)
 	ret1, _ := ret[1].(*controller.APIError)
 	return ret0, ret1
 }
 
 // PopulateMetadata indicates an expected call of PopulateMetadata.
-func (mr *MockMetadataStorageMockRecorder) PopulateMetadata(ctx, id, name, size, bucketID, etag, IsUploaded, mimeType, metadata, headers any) *gomock.Call {
+func (mr *MockMetadataStorageMockRecorder) PopulateMetadata(ctx, id, name, size, bucketID, etag, IsUploaded, mimeType, objectKey, chunkSize, chunkCount, metadata, headers any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PopulateMetadata", reflect.TypeOf((*MockMetadataStorage)(nil).PopulateMetadata), ctx, id, name, size, bucketID, etag, IsUploaded, mimeType, metadata, headers)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PopulateMetadata", reflect.TypeOf((*MockMetadataStorage)(nil).PopulateMetadata), ctx, id, name, size, bucketID, etag, IsUploaded, mimeType, objectKey, chunkSize, chunkCount, metadata, headers)
 }
 
 // SetIsUploaded mocks base method.

@@ -56,17 +56,70 @@ func (md *BucketMetadataFragment) ToControllerType() controller.BucketMetadata {
 }
 
 func (md *FileMetadataFragment) ToControllerType() controller.FileMetadata {
+	ID := md.GetID()
+
+	Name := ""
+	if md.GetName() != nil {
+		Name = *md.GetName()
+	}
+
+	Size := int64(0)
+	if md.GetSize() != nil {
+		Size = *md.GetSize()
+	}
+
+	BucketID := md.GetBucketID()
+
+	ETag := ""
+	if md.GetEtag() != nil {
+		ETag = *md.GetEtag()
+	}
+
+	CreatedAt := md.GetCreatedAt()
+
+	UpdatedAt := md.GetUpdatedAt()
+
+	IsUploaded := false
+	if md.GetIsUploaded() != nil {
+		IsUploaded = *md.GetIsUploaded()
+	}
+
+	MimeType := ""
+	if md.GetMimeType() != nil {
+		MimeType = *md.GetMimeType()
+	}
+
+	Metadata := md.GetMetadata()
+
+	ObjectKey := ""
+	if md.GetObjectKey() != nil {
+		ObjectKey = *md.GetObjectKey()
+	}
+
+	ChunkSize := int64(0)
+	if md.GetChunkSize() != nil {
+		ChunkSize = *md.GetChunkSize()
+	}
+
+	ChunkCount := int64(0)
+	if md.GetChunkCount() != nil {
+		ChunkCount = *md.GetChunkCount()
+	}
+
 	return controller.FileMetadata{
-		ID:         md.GetID(),
-		Name:       *md.GetName(),
-		Size:       *md.GetSize(),
-		BucketID:   md.GetBucketID(),
-		ETag:       *md.GetEtag(),
-		CreatedAt:  md.GetCreatedAt(),
-		UpdatedAt:  md.GetUpdatedAt(),
-		IsUploaded: *md.GetIsUploaded(),
-		MimeType:   *md.GetMimeType(),
-		Metadata:   md.GetMetadata(),
+		ID:         ID,
+		Name:       Name,
+		Size:       Size,
+		BucketID:   BucketID,
+		ETag:       ETag,
+		CreatedAt:  CreatedAt,
+		UpdatedAt:  UpdatedAt,
+		IsUploaded: IsUploaded,
+		MimeType:   MimeType,
+		Metadata:   Metadata,
+		ObjectKey:  ObjectKey,
+		ChunkSize:  ChunkSize,
+		ChunkCount: ChunkCount,
 	}
 }
 
@@ -126,16 +179,27 @@ func (h *Hasura) GetBucketByID(
 func (h *Hasura) InitializeFile(
 	ctx context.Context,
 	fileID, name string, size int64, bucketID, mimeType string,
+	objectKey string, chunkSize int64, chunkCount int64,
 	headers http.Header,
 ) *controller.APIError {
+	if objectKey == "" {
+		objectKey = fileID
+	}
+	if chunkSize <= 0 || chunkCount <= 0 {
+		chunkSize = size
+		chunkCount = 1
+	}
 	_, err := h.cl.InsertFile(
 		ctx,
 		FilesInsertInput{
-			BucketID: ptr(bucketID),
-			ID:       ptr(fileID),
-			MimeType: ptr(mimeType),
-			Name:     ptr(name),
-			Size:     ptr(size),
+			BucketID:   ptr(bucketID),
+			ID:         ptr(fileID),
+			MimeType:   ptr(mimeType),
+			Name:       ptr(name),
+			Size:       ptr(size),
+			ObjectKey:  ptr(objectKey),
+			ChunkSize:  ptr(chunkSize),
+			ChunkCount: ptr(chunkCount),
 		},
 		WithHeaders(headers),
 	)
@@ -150,9 +214,17 @@ func (h *Hasura) InitializeFile(
 func (h *Hasura) PopulateMetadata(
 	ctx context.Context,
 	fileID, name string, size int64, bucketID, etag string, isUploaded bool, mimeType string,
+	objectKey string, chunkSize int64, chunkCount int64,
 	metadata map[string]any,
 	headers http.Header,
 ) (controller.FileMetadata, *controller.APIError) {
+	if objectKey == "" {
+		objectKey = fileID
+	}
+	if chunkSize <= 0 || chunkCount <= 0 {
+		chunkSize = size
+		chunkCount = 1
+	}
 	resp, err := h.cl.UpdateFile(
 		ctx,
 		fileID,
@@ -164,6 +236,9 @@ func (h *Hasura) PopulateMetadata(
 			MimeType:   ptr(mimeType),
 			Name:       ptr(name),
 			Size:       ptr(size),
+			ObjectKey:  ptr(objectKey),
+			ChunkSize:  ptr(chunkSize),
+			ChunkCount: ptr(chunkCount),
 		},
 		WithHeaders(headers),
 	)

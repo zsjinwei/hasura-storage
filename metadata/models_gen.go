@@ -305,6 +305,8 @@ type Files struct {
 	// An object relationship
 	Bucket           Buckets                `json:"bucket"`
 	BucketID         string                 `json:"bucketId"`
+	ChunkCount       *int64                 `json:"chunkCount,omitempty"`
+	ChunkSize        *int64                 `json:"chunkSize,omitempty"`
 	CreatedAt        string                 `json:"createdAt"`
 	Etag             *string                `json:"etag,omitempty"`
 	ID               string                 `json:"id"`
@@ -312,6 +314,7 @@ type Files struct {
 	Metadata         map[string]interface{} `json:"metadata,omitempty"`
 	MimeType         *string                `json:"mimeType,omitempty"`
 	Name             *string                `json:"name,omitempty"`
+	ObjectKey        *string                `json:"objectKey,omitempty"`
 	Size             *int64                 `json:"size,omitempty"`
 	UpdatedAt        string                 `json:"updatedAt"`
 	UploadedByUserID *string                `json:"uploadedByUserId,omitempty"`
@@ -394,12 +397,16 @@ type FilesArrRelInsertInput struct {
 
 // aggregate avg on columns
 type FilesAvgFields struct {
-	Size *float64 `json:"size,omitempty"`
+	ChunkCount *float64 `json:"chunkCount,omitempty"`
+	ChunkSize  *float64 `json:"chunkSize,omitempty"`
+	Size       *float64 `json:"size,omitempty"`
 }
 
 // order by avg() on columns of table "storage.files"
 type FilesAvgOrderBy struct {
-	Size *OrderBy `json:"size,omitempty"`
+	ChunkCount *OrderBy `json:"chunkCount,omitempty"`
+	ChunkSize  *OrderBy `json:"chunkSize,omitempty"`
+	Size       *OrderBy `json:"size,omitempty"`
 }
 
 // Boolean expression to filter rows from the table "storage.files". All fields are combined with a logical 'AND'.
@@ -409,6 +416,8 @@ type FilesBoolExp struct {
 	Or               []*FilesBoolExp           `json:"_or,omitempty"`
 	Bucket           *BucketsBoolExp           `json:"bucket,omitempty"`
 	BucketID         *StringComparisonExp      `json:"bucketId,omitempty"`
+	ChunkCount       *IntComparisonExp         `json:"chunkCount,omitempty"`
+	ChunkSize        *IntComparisonExp         `json:"chunkSize,omitempty"`
 	CreatedAt        *TimestamptzComparisonExp `json:"createdAt,omitempty"`
 	Etag             *StringComparisonExp      `json:"etag,omitempty"`
 	ID               *UUIDComparisonExp        `json:"id,omitempty"`
@@ -416,6 +425,7 @@ type FilesBoolExp struct {
 	Metadata         *JsonbComparisonExp       `json:"metadata,omitempty"`
 	MimeType         *StringComparisonExp      `json:"mimeType,omitempty"`
 	Name             *StringComparisonExp      `json:"name,omitempty"`
+	ObjectKey        *StringComparisonExp      `json:"objectKey,omitempty"`
 	Size             *IntComparisonExp         `json:"size,omitempty"`
 	UpdatedAt        *TimestamptzComparisonExp `json:"updatedAt,omitempty"`
 	UploadedByUserID *UUIDComparisonExp        `json:"uploadedByUserId,omitempty"`
@@ -438,13 +448,17 @@ type FilesDeleteKeyInput struct {
 
 // input type for incrementing numeric columns in table "storage.files"
 type FilesIncInput struct {
-	Size *int64 `json:"size,omitempty"`
+	ChunkCount *int64 `json:"chunkCount,omitempty"`
+	ChunkSize  *int64 `json:"chunkSize,omitempty"`
+	Size       *int64 `json:"size,omitempty"`
 }
 
 // input type for inserting data into table "storage.files"
 type FilesInsertInput struct {
 	Bucket           *BucketsObjRelInsertInput `json:"bucket,omitempty"`
 	BucketID         *string                   `json:"bucketId,omitempty"`
+	ChunkCount       *int64                    `json:"chunkCount,omitempty"`
+	ChunkSize        *int64                    `json:"chunkSize,omitempty"`
 	CreatedAt        *string                   `json:"createdAt,omitempty"`
 	Etag             *string                   `json:"etag,omitempty"`
 	ID               *string                   `json:"id,omitempty"`
@@ -452,6 +466,7 @@ type FilesInsertInput struct {
 	Metadata         map[string]interface{}    `json:"metadata,omitempty"`
 	MimeType         *string                   `json:"mimeType,omitempty"`
 	Name             *string                   `json:"name,omitempty"`
+	ObjectKey        *string                   `json:"objectKey,omitempty"`
 	Size             *int64                    `json:"size,omitempty"`
 	UpdatedAt        *string                   `json:"updatedAt,omitempty"`
 	UploadedByUserID *string                   `json:"uploadedByUserId,omitempty"`
@@ -460,11 +475,14 @@ type FilesInsertInput struct {
 // aggregate max on columns
 type FilesMaxFields struct {
 	BucketID         *string `json:"bucketId,omitempty"`
+	ChunkCount       *int64  `json:"chunkCount,omitempty"`
+	ChunkSize        *int64  `json:"chunkSize,omitempty"`
 	CreatedAt        *string `json:"createdAt,omitempty"`
 	Etag             *string `json:"etag,omitempty"`
 	ID               *string `json:"id,omitempty"`
 	MimeType         *string `json:"mimeType,omitempty"`
 	Name             *string `json:"name,omitempty"`
+	ObjectKey        *string `json:"objectKey,omitempty"`
 	Size             *int64  `json:"size,omitempty"`
 	UpdatedAt        *string `json:"updatedAt,omitempty"`
 	UploadedByUserID *string `json:"uploadedByUserId,omitempty"`
@@ -473,11 +491,14 @@ type FilesMaxFields struct {
 // order by max() on columns of table "storage.files"
 type FilesMaxOrderBy struct {
 	BucketID         *OrderBy `json:"bucketId,omitempty"`
+	ChunkCount       *OrderBy `json:"chunkCount,omitempty"`
+	ChunkSize        *OrderBy `json:"chunkSize,omitempty"`
 	CreatedAt        *OrderBy `json:"createdAt,omitempty"`
 	Etag             *OrderBy `json:"etag,omitempty"`
 	ID               *OrderBy `json:"id,omitempty"`
 	MimeType         *OrderBy `json:"mimeType,omitempty"`
 	Name             *OrderBy `json:"name,omitempty"`
+	ObjectKey        *OrderBy `json:"objectKey,omitempty"`
 	Size             *OrderBy `json:"size,omitempty"`
 	UpdatedAt        *OrderBy `json:"updatedAt,omitempty"`
 	UploadedByUserID *OrderBy `json:"uploadedByUserId,omitempty"`
@@ -486,11 +507,14 @@ type FilesMaxOrderBy struct {
 // aggregate min on columns
 type FilesMinFields struct {
 	BucketID         *string `json:"bucketId,omitempty"`
+	ChunkCount       *int64  `json:"chunkCount,omitempty"`
+	ChunkSize        *int64  `json:"chunkSize,omitempty"`
 	CreatedAt        *string `json:"createdAt,omitempty"`
 	Etag             *string `json:"etag,omitempty"`
 	ID               *string `json:"id,omitempty"`
 	MimeType         *string `json:"mimeType,omitempty"`
 	Name             *string `json:"name,omitempty"`
+	ObjectKey        *string `json:"objectKey,omitempty"`
 	Size             *int64  `json:"size,omitempty"`
 	UpdatedAt        *string `json:"updatedAt,omitempty"`
 	UploadedByUserID *string `json:"uploadedByUserId,omitempty"`
@@ -499,11 +523,14 @@ type FilesMinFields struct {
 // order by min() on columns of table "storage.files"
 type FilesMinOrderBy struct {
 	BucketID         *OrderBy `json:"bucketId,omitempty"`
+	ChunkCount       *OrderBy `json:"chunkCount,omitempty"`
+	ChunkSize        *OrderBy `json:"chunkSize,omitempty"`
 	CreatedAt        *OrderBy `json:"createdAt,omitempty"`
 	Etag             *OrderBy `json:"etag,omitempty"`
 	ID               *OrderBy `json:"id,omitempty"`
 	MimeType         *OrderBy `json:"mimeType,omitempty"`
 	Name             *OrderBy `json:"name,omitempty"`
+	ObjectKey        *OrderBy `json:"objectKey,omitempty"`
 	Size             *OrderBy `json:"size,omitempty"`
 	UpdatedAt        *OrderBy `json:"updatedAt,omitempty"`
 	UploadedByUserID *OrderBy `json:"uploadedByUserId,omitempty"`
@@ -535,6 +562,8 @@ type FilesOnConflict struct {
 type FilesOrderBy struct {
 	Bucket           *BucketsOrderBy `json:"bucket,omitempty"`
 	BucketID         *OrderBy        `json:"bucketId,omitempty"`
+	ChunkCount       *OrderBy        `json:"chunkCount,omitempty"`
+	ChunkSize        *OrderBy        `json:"chunkSize,omitempty"`
 	CreatedAt        *OrderBy        `json:"createdAt,omitempty"`
 	Etag             *OrderBy        `json:"etag,omitempty"`
 	ID               *OrderBy        `json:"id,omitempty"`
@@ -542,6 +571,7 @@ type FilesOrderBy struct {
 	Metadata         *OrderBy        `json:"metadata,omitempty"`
 	MimeType         *OrderBy        `json:"mimeType,omitempty"`
 	Name             *OrderBy        `json:"name,omitempty"`
+	ObjectKey        *OrderBy        `json:"objectKey,omitempty"`
 	Size             *OrderBy        `json:"size,omitempty"`
 	UpdatedAt        *OrderBy        `json:"updatedAt,omitempty"`
 	UploadedByUserID *OrderBy        `json:"uploadedByUserId,omitempty"`
@@ -560,6 +590,8 @@ type FilesPrependInput struct {
 // input type for updating data in table "storage.files"
 type FilesSetInput struct {
 	BucketID         *string                `json:"bucketId,omitempty"`
+	ChunkCount       *int64                 `json:"chunkCount,omitempty"`
+	ChunkSize        *int64                 `json:"chunkSize,omitempty"`
 	CreatedAt        *string                `json:"createdAt,omitempty"`
 	Etag             *string                `json:"etag,omitempty"`
 	ID               *string                `json:"id,omitempty"`
@@ -567,6 +599,7 @@ type FilesSetInput struct {
 	Metadata         map[string]interface{} `json:"metadata,omitempty"`
 	MimeType         *string                `json:"mimeType,omitempty"`
 	Name             *string                `json:"name,omitempty"`
+	ObjectKey        *string                `json:"objectKey,omitempty"`
 	Size             *int64                 `json:"size,omitempty"`
 	UpdatedAt        *string                `json:"updatedAt,omitempty"`
 	UploadedByUserID *string                `json:"uploadedByUserId,omitempty"`
@@ -574,32 +607,44 @@ type FilesSetInput struct {
 
 // aggregate stddev on columns
 type FilesStddevFields struct {
-	Size *float64 `json:"size,omitempty"`
+	ChunkCount *float64 `json:"chunkCount,omitempty"`
+	ChunkSize  *float64 `json:"chunkSize,omitempty"`
+	Size       *float64 `json:"size,omitempty"`
 }
 
 // order by stddev() on columns of table "storage.files"
 type FilesStddevOrderBy struct {
-	Size *OrderBy `json:"size,omitempty"`
+	ChunkCount *OrderBy `json:"chunkCount,omitempty"`
+	ChunkSize  *OrderBy `json:"chunkSize,omitempty"`
+	Size       *OrderBy `json:"size,omitempty"`
 }
 
 // aggregate stddev_pop on columns
 type FilesStddevPopFields struct {
-	Size *float64 `json:"size,omitempty"`
+	ChunkCount *float64 `json:"chunkCount,omitempty"`
+	ChunkSize  *float64 `json:"chunkSize,omitempty"`
+	Size       *float64 `json:"size,omitempty"`
 }
 
 // order by stddev_pop() on columns of table "storage.files"
 type FilesStddevPopOrderBy struct {
-	Size *OrderBy `json:"size,omitempty"`
+	ChunkCount *OrderBy `json:"chunkCount,omitempty"`
+	ChunkSize  *OrderBy `json:"chunkSize,omitempty"`
+	Size       *OrderBy `json:"size,omitempty"`
 }
 
 // aggregate stddev_samp on columns
 type FilesStddevSampFields struct {
-	Size *float64 `json:"size,omitempty"`
+	ChunkCount *float64 `json:"chunkCount,omitempty"`
+	ChunkSize  *float64 `json:"chunkSize,omitempty"`
+	Size       *float64 `json:"size,omitempty"`
 }
 
 // order by stddev_samp() on columns of table "storage.files"
 type FilesStddevSampOrderBy struct {
-	Size *OrderBy `json:"size,omitempty"`
+	ChunkCount *OrderBy `json:"chunkCount,omitempty"`
+	ChunkSize  *OrderBy `json:"chunkSize,omitempty"`
+	Size       *OrderBy `json:"size,omitempty"`
 }
 
 // Streaming cursor of the table "files"
@@ -613,6 +658,8 @@ type FilesStreamCursorInput struct {
 // Initial value of the column from where the streaming should start
 type FilesStreamCursorValueInput struct {
 	BucketID         *string                `json:"bucketId,omitempty"`
+	ChunkCount       *int64                 `json:"chunkCount,omitempty"`
+	ChunkSize        *int64                 `json:"chunkSize,omitempty"`
 	CreatedAt        *string                `json:"createdAt,omitempty"`
 	Etag             *string                `json:"etag,omitempty"`
 	ID               *string                `json:"id,omitempty"`
@@ -620,6 +667,7 @@ type FilesStreamCursorValueInput struct {
 	Metadata         map[string]interface{} `json:"metadata,omitempty"`
 	MimeType         *string                `json:"mimeType,omitempty"`
 	Name             *string                `json:"name,omitempty"`
+	ObjectKey        *string                `json:"objectKey,omitempty"`
 	Size             *int64                 `json:"size,omitempty"`
 	UpdatedAt        *string                `json:"updatedAt,omitempty"`
 	UploadedByUserID *string                `json:"uploadedByUserId,omitempty"`
@@ -627,12 +675,16 @@ type FilesStreamCursorValueInput struct {
 
 // aggregate sum on columns
 type FilesSumFields struct {
-	Size *int64 `json:"size,omitempty"`
+	ChunkCount *int64 `json:"chunkCount,omitempty"`
+	ChunkSize  *int64 `json:"chunkSize,omitempty"`
+	Size       *int64 `json:"size,omitempty"`
 }
 
 // order by sum() on columns of table "storage.files"
 type FilesSumOrderBy struct {
-	Size *OrderBy `json:"size,omitempty"`
+	ChunkCount *OrderBy `json:"chunkCount,omitempty"`
+	ChunkSize  *OrderBy `json:"chunkSize,omitempty"`
+	Size       *OrderBy `json:"size,omitempty"`
 }
 
 type FilesUpdates struct {
@@ -656,32 +708,44 @@ type FilesUpdates struct {
 
 // aggregate var_pop on columns
 type FilesVarPopFields struct {
-	Size *float64 `json:"size,omitempty"`
+	ChunkCount *float64 `json:"chunkCount,omitempty"`
+	ChunkSize  *float64 `json:"chunkSize,omitempty"`
+	Size       *float64 `json:"size,omitempty"`
 }
 
 // order by var_pop() on columns of table "storage.files"
 type FilesVarPopOrderBy struct {
-	Size *OrderBy `json:"size,omitempty"`
+	ChunkCount *OrderBy `json:"chunkCount,omitempty"`
+	ChunkSize  *OrderBy `json:"chunkSize,omitempty"`
+	Size       *OrderBy `json:"size,omitempty"`
 }
 
 // aggregate var_samp on columns
 type FilesVarSampFields struct {
-	Size *float64 `json:"size,omitempty"`
+	ChunkCount *float64 `json:"chunkCount,omitempty"`
+	ChunkSize  *float64 `json:"chunkSize,omitempty"`
+	Size       *float64 `json:"size,omitempty"`
 }
 
 // order by var_samp() on columns of table "storage.files"
 type FilesVarSampOrderBy struct {
-	Size *OrderBy `json:"size,omitempty"`
+	ChunkCount *OrderBy `json:"chunkCount,omitempty"`
+	ChunkSize  *OrderBy `json:"chunkSize,omitempty"`
+	Size       *OrderBy `json:"size,omitempty"`
 }
 
 // aggregate variance on columns
 type FilesVarianceFields struct {
-	Size *float64 `json:"size,omitempty"`
+	ChunkCount *float64 `json:"chunkCount,omitempty"`
+	ChunkSize  *float64 `json:"chunkSize,omitempty"`
+	Size       *float64 `json:"size,omitempty"`
 }
 
 // order by variance() on columns of table "storage.files"
 type FilesVarianceOrderBy struct {
-	Size *OrderBy `json:"size,omitempty"`
+	ChunkCount *OrderBy `json:"chunkCount,omitempty"`
+	ChunkSize  *OrderBy `json:"chunkSize,omitempty"`
+	Size       *OrderBy `json:"size,omitempty"`
 }
 
 type JsonbCastExp struct {
@@ -1199,6 +1263,10 @@ const (
 	// column name
 	FilesSelectColumnBucketID FilesSelectColumn = "bucketId"
 	// column name
+	FilesSelectColumnChunkCount FilesSelectColumn = "chunkCount"
+	// column name
+	FilesSelectColumnChunkSize FilesSelectColumn = "chunkSize"
+	// column name
 	FilesSelectColumnCreatedAt FilesSelectColumn = "createdAt"
 	// column name
 	FilesSelectColumnEtag FilesSelectColumn = "etag"
@@ -1213,6 +1281,8 @@ const (
 	// column name
 	FilesSelectColumnName FilesSelectColumn = "name"
 	// column name
+	FilesSelectColumnObjectKey FilesSelectColumn = "objectKey"
+	// column name
 	FilesSelectColumnSize FilesSelectColumn = "size"
 	// column name
 	FilesSelectColumnUpdatedAt FilesSelectColumn = "updatedAt"
@@ -1222,6 +1292,8 @@ const (
 
 var AllFilesSelectColumn = []FilesSelectColumn{
 	FilesSelectColumnBucketID,
+	FilesSelectColumnChunkCount,
+	FilesSelectColumnChunkSize,
 	FilesSelectColumnCreatedAt,
 	FilesSelectColumnEtag,
 	FilesSelectColumnID,
@@ -1229,6 +1301,7 @@ var AllFilesSelectColumn = []FilesSelectColumn{
 	FilesSelectColumnMetadata,
 	FilesSelectColumnMimeType,
 	FilesSelectColumnName,
+	FilesSelectColumnObjectKey,
 	FilesSelectColumnSize,
 	FilesSelectColumnUpdatedAt,
 	FilesSelectColumnUploadedByUserID,
@@ -1236,7 +1309,7 @@ var AllFilesSelectColumn = []FilesSelectColumn{
 
 func (e FilesSelectColumn) IsValid() bool {
 	switch e {
-	case FilesSelectColumnBucketID, FilesSelectColumnCreatedAt, FilesSelectColumnEtag, FilesSelectColumnID, FilesSelectColumnIsUploaded, FilesSelectColumnMetadata, FilesSelectColumnMimeType, FilesSelectColumnName, FilesSelectColumnSize, FilesSelectColumnUpdatedAt, FilesSelectColumnUploadedByUserID:
+	case FilesSelectColumnBucketID, FilesSelectColumnChunkCount, FilesSelectColumnChunkSize, FilesSelectColumnCreatedAt, FilesSelectColumnEtag, FilesSelectColumnID, FilesSelectColumnIsUploaded, FilesSelectColumnMetadata, FilesSelectColumnMimeType, FilesSelectColumnName, FilesSelectColumnObjectKey, FilesSelectColumnSize, FilesSelectColumnUpdatedAt, FilesSelectColumnUploadedByUserID:
 		return true
 	}
 	return false
@@ -1352,6 +1425,10 @@ const (
 	// column name
 	FilesUpdateColumnBucketID FilesUpdateColumn = "bucketId"
 	// column name
+	FilesUpdateColumnChunkCount FilesUpdateColumn = "chunkCount"
+	// column name
+	FilesUpdateColumnChunkSize FilesUpdateColumn = "chunkSize"
+	// column name
 	FilesUpdateColumnCreatedAt FilesUpdateColumn = "createdAt"
 	// column name
 	FilesUpdateColumnEtag FilesUpdateColumn = "etag"
@@ -1366,6 +1443,8 @@ const (
 	// column name
 	FilesUpdateColumnName FilesUpdateColumn = "name"
 	// column name
+	FilesUpdateColumnObjectKey FilesUpdateColumn = "objectKey"
+	// column name
 	FilesUpdateColumnSize FilesUpdateColumn = "size"
 	// column name
 	FilesUpdateColumnUpdatedAt FilesUpdateColumn = "updatedAt"
@@ -1375,6 +1454,8 @@ const (
 
 var AllFilesUpdateColumn = []FilesUpdateColumn{
 	FilesUpdateColumnBucketID,
+	FilesUpdateColumnChunkCount,
+	FilesUpdateColumnChunkSize,
 	FilesUpdateColumnCreatedAt,
 	FilesUpdateColumnEtag,
 	FilesUpdateColumnID,
@@ -1382,6 +1463,7 @@ var AllFilesUpdateColumn = []FilesUpdateColumn{
 	FilesUpdateColumnMetadata,
 	FilesUpdateColumnMimeType,
 	FilesUpdateColumnName,
+	FilesUpdateColumnObjectKey,
 	FilesUpdateColumnSize,
 	FilesUpdateColumnUpdatedAt,
 	FilesUpdateColumnUploadedByUserID,
@@ -1389,7 +1471,7 @@ var AllFilesUpdateColumn = []FilesUpdateColumn{
 
 func (e FilesUpdateColumn) IsValid() bool {
 	switch e {
-	case FilesUpdateColumnBucketID, FilesUpdateColumnCreatedAt, FilesUpdateColumnEtag, FilesUpdateColumnID, FilesUpdateColumnIsUploaded, FilesUpdateColumnMetadata, FilesUpdateColumnMimeType, FilesUpdateColumnName, FilesUpdateColumnSize, FilesUpdateColumnUpdatedAt, FilesUpdateColumnUploadedByUserID:
+	case FilesUpdateColumnBucketID, FilesUpdateColumnChunkCount, FilesUpdateColumnChunkSize, FilesUpdateColumnCreatedAt, FilesUpdateColumnEtag, FilesUpdateColumnID, FilesUpdateColumnIsUploaded, FilesUpdateColumnMetadata, FilesUpdateColumnMimeType, FilesUpdateColumnName, FilesUpdateColumnObjectKey, FilesUpdateColumnSize, FilesUpdateColumnUpdatedAt, FilesUpdateColumnUploadedByUserID:
 		return true
 	}
 	return false

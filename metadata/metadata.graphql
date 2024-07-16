@@ -10,6 +10,9 @@ fragment FileMetadataFragment on files {
   mimeType
   uploadedByUserId
   metadata
+  objectKey
+  chunkSize
+  chunkCount
 }
 
 fragment FileMetadataSummaryFragment on files {
@@ -42,7 +45,7 @@ query GetFile($id: uuid!) {
   }
 }
 
-query ListFilesSummary() {
+query ListFilesSummary {
   files {
     ...FileMetadataSummaryFragment
   }

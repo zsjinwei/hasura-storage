@@ -44,6 +44,9 @@ type FileMetadata struct {
 	MimeType         string         `json:"mimeType"`
 	UploadedByUserID string         `json:"uploadedByUserId"`
 	Metadata         map[string]any `json:"metadata"`
+	ObjectKey        string         `json:"objectKey"`
+	ChunkSize        int64          `json:"chunkSize"`
+	ChunkCount       int64          `json:"chunkCount"`
 }
 
 type MetadataStorage interface {
@@ -52,11 +55,13 @@ type MetadataStorage interface {
 	InitializeFile(
 		ctx context.Context,
 		id, name string, size int64, bucketID, mimeType string,
+		objectKey string, chunkSize int64, chunkCount int64,
 		headers http.Header,
 	) *APIError
 	PopulateMetadata(
 		ctx context.Context,
 		id, name string, size int64, bucketID, etag string, IsUploaded bool, mimeType string,
+		objectKey string, chunkSize int64, chunkCount int64,
 		metadata map[string]any,
 		headers http.Header) (FileMetadata, *APIError,
 	)
@@ -192,6 +197,7 @@ func (ctrl *Controller) SetupRouter(
 		files.DELETE("/:id", ctrl.DeleteFile)
 		files.GET("/:id/presignedurl", ctrl.GetFilePresignedURL)
 		files.GET("/:id/presignedurl/content", ctrl.GetFileWithPresignedURL)
+		files.GET("/:id/download/:name", ctrl.DownloadFile)
 	}
 
 	ops := apiRoot.Group("/ops")

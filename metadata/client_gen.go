@@ -63,6 +63,9 @@ type FileMetadataFragment struct {
 	MimeType         *string                "json:\"mimeType,omitempty\" graphql:\"mimeType\""
 	UploadedByUserID *string                "json:\"uploadedByUserId,omitempty\" graphql:\"uploadedByUserId\""
 	Metadata         map[string]interface{} "json:\"metadata,omitempty\" graphql:\"metadata\""
+	ObjectKey        *string                "json:\"objectKey,omitempty\" graphql:\"objectKey\""
+	ChunkSize        *int64                 "json:\"chunkSize,omitempty\" graphql:\"chunkSize\""
+	ChunkCount       *int64                 "json:\"chunkCount,omitempty\" graphql:\"chunkCount\""
 }
 
 func (t *FileMetadataFragment) GetID() string {
@@ -130,6 +133,24 @@ func (t *FileMetadataFragment) GetMetadata() map[string]interface{} {
 		t = &FileMetadataFragment{}
 	}
 	return t.Metadata
+}
+func (t *FileMetadataFragment) GetObjectKey() *string {
+	if t == nil {
+		t = &FileMetadataFragment{}
+	}
+	return t.ObjectKey
+}
+func (t *FileMetadataFragment) GetChunkSize() *int64 {
+	if t == nil {
+		t = &FileMetadataFragment{}
+	}
+	return t.ChunkSize
+}
+func (t *FileMetadataFragment) GetChunkCount() *int64 {
+	if t == nil {
+		t = &FileMetadataFragment{}
+	}
+	return t.ChunkCount
 }
 
 type FileMetadataSummaryFragment struct {
@@ -385,6 +406,9 @@ fragment FileMetadataFragment on files {
 	mimeType
 	uploadedByUserId
 	metadata
+	objectKey
+	chunkSize
+	chunkCount
 }
 `
 
@@ -474,6 +498,9 @@ fragment FileMetadataFragment on files {
 	mimeType
 	uploadedByUserId
 	metadata
+	objectKey
+	chunkSize
+	chunkCount
 }
 `
 

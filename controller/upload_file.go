@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"mime/multipart"
 	"net/http"
+	"net/url"
 
 	"github.com/gabriel-vasile/mimetype"
 	"github.com/gin-gonic/gin"
@@ -27,9 +28,10 @@ type fileData struct {
 }
 
 type uploadFileRequest struct {
-	bucketID string
-	files    []fileData
-	headers  http.Header
+	bucketID     string
+	objectPrefix string
+	files        []fileData
+	headers      http.Header
 }
 
 func checkFileSize(file *multipart.FileHeader, minSize, maxSize int) *APIError {
@@ -96,11 +98,19 @@ func (ctrl *Controller) processFile(
 	ctx context.Context,
 	file fileData,
 	bucket BucketMetadata,
+	objectPrefix string,
 	headers http.Header,
 ) (FileMetadata, *APIError) {
 	if err := checkFileSize(file.header, bucket.MinUploadFile, bucket.MaxUploadFile); err != nil {
 		return FileMetadata{}, InternalServerError(
 			fmt.Errorf("problem checking file size %s: %w", file.Name, err),
+		)
+	}
+
+	objectKey, joinErr := url.JoinPath(objectPrefix, file.ID)
+	if joinErr != nil {
+		return FileMetadata{}, InternalServerError(
+			fmt.Errorf("problem joining path: %w", joinErr),
 		)
 	}
 
@@ -111,7 +121,7 @@ func (ctrl *Controller) processFile(
 	defer fileContent.Close()
 
 	if err := ctrl.metadataStorage.InitializeFile(
-		ctx, file.ID, file.Name, file.header.Size, bucket.ID, contentType, headers,
+		ctx, file.ID, file.Name, file.header.Size, bucket.ID, contentType, objectKey, file.header.Size, 1, headers,
 	); err != nil {
 		return FileMetadata{}, err
 	}
@@ -122,7 +132,7 @@ func (ctrl *Controller) processFile(
 		return FileMetadata{}, err
 	}
 
-	etag, apiErr := ctrl.contentStorage.PutFile(ctx, fileContent, file.ID, contentType)
+	etag, apiErr := ctrl.contentStorage.PutFile(ctx, fileContent, objectKey, contentType)
 	if apiErr != nil {
 		_ = ctrl.metadataStorage.DeleteFileByID(
 			ctx,
@@ -134,7 +144,7 @@ func (ctrl *Controller) processFile(
 
 	metadata, apiErr := ctrl.metadataStorage.PopulateMetadata(
 		ctx,
-		file.ID, file.Name, file.header.Size, bucket.ID, etag, true, contentType, file.Metadata,
+		file.ID, file.Name, file.header.Size, bucket.ID, etag, true, contentType, objectKey, file.header.Size, 1, file.Metadata,
 		http.Header{"x-hasura-admin-secret": []string{ctrl.hasuraAdminSecret}},
 	)
 	if apiErr != nil {
@@ -162,7 +172,7 @@ func (ctrl *Controller) upload(
 	filesMetadata := make([]FileMetadata, 0, len(request.files))
 
 	for _, file := range request.files {
-		metadata, err := ctrl.processFile(ctx, file, bucket, request.headers)
+		metadata, err := ctrl.processFile(ctx, file, bucket, request.objectPrefix, request.headers)
 		if err != nil {
 			return filesMetadata, err
 		}
@@ -202,6 +212,14 @@ func getBucketIDFromFormValue(md map[string][]string) string {
 	return "default"
 }
 
+func getObjectPrefixFromFormValue(md map[string][]string) string {
+	objectPrefix, ok := md["object-prefix"]
+	if ok {
+		return objectPrefix[0]
+	}
+	return ""
+}
+
 func parseUploadRequestOld(ctx *gin.Context) (uploadFileRequest, *APIError) {
 	form, err := ctx.MultipartForm()
 	if err != nil {
@@ -221,6 +239,10 @@ func parseUploadRequestOld(ctx *gin.Context) (uploadFileRequest, *APIError) {
 	if bucketID == "" {
 		bucketID = "default"
 	}
+	objectPrefix := ctx.Request.Header.Get("X-Nhost-Object-Prefix")
+	if objectPrefix == "" {
+		objectPrefix = ""
+	}
 	fileName := ctx.Request.Header.Get("X-Nhost-File-Name")
 	if fileName == "" {
 		fileName = fileHeader.Filename
@@ -236,7 +258,8 @@ func parseUploadRequestOld(ctx *gin.Context) (uploadFileRequest, *APIError) {
 	)
 
 	return uploadFileRequest{
-		bucketID: bucketID,
+		bucketID:     bucketID,
+		objectPrefix: objectPrefix,
 		files: []fileData{
 			{
 				Name:   fileName,
@@ -284,9 +307,10 @@ func parseUploadRequestNew(ctx *gin.Context) (uploadFileRequest, *APIError) {
 	}
 
 	return uploadFileRequest{
-		bucketID: getBucketIDFromFormValue(form.Value),
-		files:    processedFiles,
-		headers:  ctx.Request.Header,
+		bucketID:     getBucketIDFromFormValue(form.Value),
+		objectPrefix: getObjectPrefixFromFormValue(form.Value),
+		files:        processedFiles,
+		headers:      ctx.Request.Header,
 	}, nil
 }
 

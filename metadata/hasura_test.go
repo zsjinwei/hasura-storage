@@ -158,6 +158,9 @@ func TestInitializeFile(t *testing.T) {
 				123,
 				"default",
 				"mimetype",
+				"",
+				-1,
+				-1,
 				tc.headers,
 			)
 
@@ -183,7 +186,7 @@ func TestPopulateMetadata(t *testing.T) {
 	hasura := metadata.NewHasura(hasuraURL)
 
 	fileID := uuid.New().String()
-	if err := hasura.InitializeFile(context.Background(), fileID, "name", 123, "default", "mimetype", getAuthHeader()); err != nil {
+	if err := hasura.InitializeFile(context.Background(), fileID, "name", 123, "default", "mimetype", "", -1, -1, getAuthHeader()); err != nil {
 		panic(err)
 	}
 
@@ -212,6 +215,9 @@ func TestPopulateMetadata(t *testing.T) {
 				IsUploaded:       true,
 				MimeType:         "text",
 				UploadedByUserID: "",
+				ObjectKey:        fileID,
+				ChunkSize:        123,
+				ChunkCount:       1,
 			},
 		},
 		{
@@ -257,6 +263,9 @@ func TestPopulateMetadata(t *testing.T) {
 				"asdasd",
 				true,
 				"text",
+				"",
+				-1,
+				-1,
 				nil,
 				tc.headers,
 			)
@@ -290,11 +299,11 @@ func TestGetFileByID(t *testing.T) {
 	hasura := metadata.NewHasura(hasuraURL)
 
 	fileID := uuid.New().String()
-	if err := hasura.InitializeFile(context.Background(), fileID, "name", 123, "default", "mimetype", getAuthHeader()); err != nil {
+	if err := hasura.InitializeFile(context.Background(), fileID, "name", 123, "default", "mimetype", "", -1, -1, getAuthHeader()); err != nil {
 		panic(err)
 	}
 
-	if _, err := hasura.PopulateMetadata(context.Background(), fileID, "name", 123, "default", "asdasd", true, "text", nil, getAuthHeader()); err != nil {
+	if _, err := hasura.PopulateMetadata(context.Background(), fileID, "name", 123, "default", "asdasd", true, "text", "", -1, -1, nil, getAuthHeader()); err != nil {
 		panic(err)
 	}
 
@@ -323,6 +332,9 @@ func TestGetFileByID(t *testing.T) {
 				IsUploaded:       true,
 				MimeType:         "text",
 				UploadedByUserID: "",
+				ObjectKey:        fileID,
+				ChunkSize:        123,
+				ChunkCount:       1,
 			},
 		},
 		{
@@ -391,7 +403,7 @@ func TestSetIsUploaded(t *testing.T) {
 	hasura := metadata.NewHasura(hasuraURL)
 
 	fileID := uuid.New().String()
-	if err := hasura.InitializeFile(context.Background(), fileID, "name", 123, "default", "mimetype", getAuthHeader()); err != nil {
+	if err := hasura.InitializeFile(context.Background(), fileID, "name", 123, "default", "mimetype", "", -1, -1, getAuthHeader()); err != nil {
 		panic(err)
 	}
 
@@ -466,11 +478,11 @@ func TestDeleteFileByID(t *testing.T) {
 	hasura := metadata.NewHasura(hasuraURL)
 
 	fileID := uuid.New().String()
-	if err := hasura.InitializeFile(context.Background(), fileID, "name", 123, "default", "mimetype", getAuthHeader()); err != nil {
+	if err := hasura.InitializeFile(context.Background(), fileID, "name", 123, "default", "mimetype", "", -1, -1, getAuthHeader()); err != nil {
 		panic(err)
 	}
 
-	if _, err := hasura.PopulateMetadata(context.Background(), fileID, "name", 123, "default", "asdasd", true, "text", nil, getAuthHeader()); err != nil {
+	if _, err := hasura.PopulateMetadata(context.Background(), fileID, "name", 123, "default", "asdasd", true, "text", "", -1, -1, nil, getAuthHeader()); err != nil {
 		panic(err)
 	}
 
@@ -542,20 +554,20 @@ func TestListFiles(t *testing.T) {
 	hasura := metadata.NewHasura(hasuraURL)
 
 	fileID1 := uuid.New().String()
-	if err := hasura.InitializeFile(context.Background(), fileID1, "name", 123, "default", "mimetype", getAuthHeader()); err != nil {
+	if err := hasura.InitializeFile(context.Background(), fileID1, "name", 123, "default", "mimetype", "", -1, -1, getAuthHeader()); err != nil {
 		panic(err)
 	}
 
-	if _, err := hasura.PopulateMetadata(context.Background(), fileID1, "name", 123, "default", "asdasd", true, "text", nil, getAuthHeader()); err != nil {
+	if _, err := hasura.PopulateMetadata(context.Background(), fileID1, "name", 123, "default", "asdasd", true, "text", "", -1, -1, nil, getAuthHeader()); err != nil {
 		panic(err)
 	}
 
 	fileID2 := uuid.New().String()
-	if err := hasura.InitializeFile(context.Background(), fileID2, "name", 123, "default", "mimetype", getAuthHeader()); err != nil {
+	if err := hasura.InitializeFile(context.Background(), fileID2, "name", 123, "default", "mimetype", "", -1, -1, getAuthHeader()); err != nil {
 		panic(err)
 	}
 
-	if _, err := hasura.PopulateMetadata(context.Background(), fileID2, "asdads", 123, "default", "asdasd", true, "text", nil, getAuthHeader()); err != nil {
+	if _, err := hasura.PopulateMetadata(context.Background(), fileID2, "asdads", 123, "default", "asdasd", true, "text", "", -1, -1, nil, getAuthHeader()); err != nil {
 		panic(err)
 	}
 
