@@ -102,6 +102,7 @@ func TestUpdateFile(t *testing.T) {
 					ObjectKey:        file.md.ID,
 					ChunkSize:        int64(len(file.contents)),
 					ChunkCount:       int64(1),
+					UploadID:         "",
 				},
 				nil,
 			)
@@ -116,6 +117,7 @@ func TestUpdateFile(t *testing.T) {
 					DownloadExpiration:   30,
 					CreatedAt:            "2021-12-15T13:26:52.082485+00:00",
 					UpdatedAt:            "2021-12-15T13:26:52.082485+00:00",
+					UploadExpiration:     600,
 				},
 				nil,
 			)
@@ -163,6 +165,7 @@ func TestUpdateFile(t *testing.T) {
 					ObjectKey:        file.md.ID,
 					ChunkSize:        int64(len(file.contents)),
 					ChunkCount:       int64(1),
+					UploadID:         "",
 				},
 				nil)
 
@@ -220,6 +223,7 @@ func TestUpdateFile(t *testing.T) {
 					ObjectKey:        file.md.ID,
 					ChunkSize:        int64(len(file.contents)),
 					ChunkCount:       int64(1),
+					UploadID:         "",
 				},
 				nil,
 			}, resp,

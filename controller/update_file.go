@@ -124,7 +124,17 @@ func (ctrl *Controller) updateFile(ctx *gin.Context) (FileMetadata, *APIError) {
 
 	newMetadata, apiErr := ctrl.metadataStorage.PopulateMetadata(
 		ctx,
-		file.ID, file.Name, file.header.Size, originalMetadata.BucketID, etag, true, contentType, objectKey, file.header.Size, 1,
+		file.ID,
+		file.Name,
+		file.header.Size,
+		originalMetadata.BucketID,
+		etag,
+		true,
+		contentType,
+		objectKey,
+		file.header.Size,
+		1,
+		"",
 		file.Metadata,
 		ctx.Request.Header,
 	)

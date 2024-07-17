@@ -122,6 +122,7 @@ func TestGetFileInfo(t *testing.T) {
 				ObjectKey:        "55af1e60-0f28-454e-885e-ea6aab2bb288",
 				ChunkSize:        64,
 				ChunkCount:       1,
+				UploadID:         "",
 			}, nil)
 
 			metadataStorage.EXPECT().GetBucketByID(
@@ -135,6 +136,7 @@ func TestGetFileInfo(t *testing.T) {
 				CreatedAt:            "2021-12-15T13:26:52.082485+00:00",
 				UpdatedAt:            "2021-12-15T13:26:52.082485+00:00",
 				CacheControl:         "max-age=3600",
+				UploadExpiration:     600,
 			}, nil)
 
 			ctrl := controller.New(

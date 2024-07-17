@@ -66,6 +66,7 @@ type FileMetadataFragment struct {
 	ObjectKey        *string                "json:\"objectKey,omitempty\" graphql:\"objectKey\""
 	ChunkSize        *int64                 "json:\"chunkSize,omitempty\" graphql:\"chunkSize\""
 	ChunkCount       *int64                 "json:\"chunkCount,omitempty\" graphql:\"chunkCount\""
+	UploadID         *string                "json:\"uploadId,omitempty\" graphql:\"uploadId\""
 }
 
 func (t *FileMetadataFragment) GetID() string {
@@ -152,6 +153,12 @@ func (t *FileMetadataFragment) GetChunkCount() *int64 {
 	}
 	return t.ChunkCount
 }
+func (t *FileMetadataFragment) GetUploadID() *string {
+	if t == nil {
+		t = &FileMetadataFragment{}
+	}
+	return t.UploadID
+}
 
 type FileMetadataSummaryFragment struct {
 	ID         string  "json:\"id\" graphql:\"id\""
@@ -194,6 +201,7 @@ type BucketMetadataFragment struct {
 	CreatedAt            string  "json:\"createdAt\" graphql:\"createdAt\""
 	UpdatedAt            string  "json:\"updatedAt\" graphql:\"updatedAt\""
 	CacheControl         *string "json:\"cacheControl,omitempty\" graphql:\"cacheControl\""
+	UploadExpiration     int64   "json:\"uploadExpiration\" graphql:\"uploadExpiration\""
 }
 
 func (t *BucketMetadataFragment) GetID() string {
@@ -243,6 +251,12 @@ func (t *BucketMetadataFragment) GetCacheControl() *string {
 		t = &BucketMetadataFragment{}
 	}
 	return t.CacheControl
+}
+func (t *BucketMetadataFragment) GetUploadExpiration() int64 {
+	if t == nil {
+		t = &BucketMetadataFragment{}
+	}
+	return t.UploadExpiration
 }
 
 type InsertFile_InsertFile struct {
@@ -298,6 +312,17 @@ func (t *GetFile) GetFile() *FileMetadataFragment {
 		t = &GetFile{}
 	}
 	return t.File
+}
+
+type GetFilesByETag struct {
+	Files []*FileMetadataFragment "json:\"files\" graphql:\"files\""
+}
+
+func (t *GetFilesByETag) GetFiles() []*FileMetadataFragment {
+	if t == nil {
+		t = &GetFilesByETag{}
+	}
+	return t.Files
 }
 
 type ListFilesSummary struct {
@@ -369,11 +394,12 @@ fragment BucketMetadataFragment on buckets {
 	createdAt
 	updatedAt
 	cacheControl
+	uploadExpiration
 }
 `
 
 func (c *Client) GetBucket(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetBucket, error) {
-	vars := map[string]interface{}{
+	vars := map[string]any{
 		"id": id,
 	}
 
@@ -409,16 +435,58 @@ fragment FileMetadataFragment on files {
 	objectKey
 	chunkSize
 	chunkCount
+	uploadId
 }
 `
 
 func (c *Client) GetFile(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetFile, error) {
-	vars := map[string]interface{}{
+	vars := map[string]any{
 		"id": id,
 	}
 
 	var res GetFile
 	if err := c.Client.Post(ctx, "GetFile", GetFileDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const GetFilesByETagDocument = `query GetFilesByETag ($etag: String!) {
+	files(where: {etag:{_eq:$etag}}, order_by: {createdAt:desc}) {
+		... FileMetadataFragment
+	}
+}
+fragment FileMetadataFragment on files {
+	id
+	name
+	size
+	bucketId
+	etag
+	createdAt
+	updatedAt
+	isUploaded
+	mimeType
+	uploadedByUserId
+	metadata
+	objectKey
+	chunkSize
+	chunkCount
+	uploadId
+}
+`
+
+func (c *Client) GetFilesByETag(ctx context.Context, etag string, interceptors ...clientv2.RequestInterceptor) (*GetFilesByETag, error) {
+	vars := map[string]any{
+		"etag": etag,
+	}
+
+	var res GetFilesByETag
+	if err := c.Client.Post(ctx, "GetFilesByETag", GetFilesByETagDocument, &res, vars, interceptors...); err != nil {
 		if c.Client.ParseDataWhenErrors {
 			return &res, err
 		}
@@ -443,7 +511,7 @@ fragment FileMetadataSummaryFragment on files {
 `
 
 func (c *Client) ListFilesSummary(ctx context.Context, interceptors ...clientv2.RequestInterceptor) (*ListFilesSummary, error) {
-	vars := map[string]interface{}{}
+	vars := map[string]any{}
 
 	var res ListFilesSummary
 	if err := c.Client.Post(ctx, "ListFilesSummary", ListFilesSummaryDocument, &res, vars, interceptors...); err != nil {
@@ -465,7 +533,7 @@ const InsertFileDocument = `mutation InsertFile ($object: files_insert_input!) {
 `
 
 func (c *Client) InsertFile(ctx context.Context, object FilesInsertInput, interceptors ...clientv2.RequestInterceptor) (*InsertFile, error) {
-	vars := map[string]interface{}{
+	vars := map[string]any{
 		"object": object,
 	}
 
@@ -501,11 +569,12 @@ fragment FileMetadataFragment on files {
 	objectKey
 	chunkSize
 	chunkCount
+	uploadId
 }
 `
 
 func (c *Client) UpdateFile(ctx context.Context, id string, set FilesSetInput, interceptors ...clientv2.RequestInterceptor) (*UpdateFile, error) {
-	vars := map[string]interface{}{
+	vars := map[string]any{
 		"id":   id,
 		"_set": set,
 	}
@@ -530,7 +599,7 @@ const DeleteFileDocument = `mutation DeleteFile ($id: uuid!) {
 `
 
 func (c *Client) DeleteFile(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteFile, error) {
-	vars := map[string]interface{}{
+	vars := map[string]any{
 		"id": id,
 	}
 
@@ -554,7 +623,7 @@ const InsertVirusDocument = `mutation InsertVirus ($object: virus_insert_input!)
 `
 
 func (c *Client) InsertVirus(ctx context.Context, object VirusInsertInput, interceptors ...clientv2.RequestInterceptor) (*InsertVirus, error) {
-	vars := map[string]interface{}{
+	vars := map[string]any{
 		"object": object,
 	}
 
@@ -573,6 +642,7 @@ func (c *Client) InsertVirus(ctx context.Context, object VirusInsertInput, inter
 var DocumentOperationNames = map[string]string{
 	GetBucketDocument:        "GetBucket",
 	GetFileDocument:          "GetFile",
+	GetFilesByETagDocument:   "GetFilesByETag",
 	ListFilesSummaryDocument: "ListFilesSummary",
 	InsertFileDocument:       "InsertFile",
 	UpdateFileDocument:       "UpdateFile",

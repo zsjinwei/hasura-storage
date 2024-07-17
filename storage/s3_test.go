@@ -229,7 +229,7 @@ func TestGetFilePresignedURL(t *testing.T) {
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
-			signature, apiErr := s3.CreatePresignedURL(context.TODO(), tc.filepath, time.Second)
+			signature, apiErr := s3.CreateGetObjectPresignedURL(context.TODO(), tc.filepath, time.Second)
 			if apiErr != nil {
 				t.Error(apiErr)
 			}

@@ -148,6 +148,7 @@ func TestUploadFile(t *testing.T) {
 				DownloadExpiration:   30,
 				CreatedAt:            "2021-12-15T13:26:52.082485+00:00",
 				UpdatedAt:            "2021-12-15T13:26:52.082485+00:00",
+				UploadExpiration:     600,
 			}, nil)
 
 			{
@@ -205,6 +206,7 @@ func TestUploadFile(t *testing.T) {
 						ObjectKey:        file.md.ID,
 						ChunkSize:        int64(len(file.contents)),
 						ChunkCount:       1,
+						UploadID:         "",
 					},
 					nil)
 			}
@@ -264,6 +266,7 @@ func TestUploadFile(t *testing.T) {
 						ObjectKey:        file.md.ID,
 						ChunkSize:        int64(len(file.contents)),
 						ChunkCount:       1,
+						UploadID:         "",
 					},
 					nil)
 			}
@@ -317,6 +320,7 @@ func TestUploadFile(t *testing.T) {
 						ObjectKey:        resp.ProcessedFiles[0].ObjectKey,
 						ChunkSize:        12,
 						ChunkCount:       int64(1),
+						UploadID:         "",
 					},
 					{
 						ID:               "d041c7c5-10e7-410e-a599-799409b5",
@@ -333,6 +337,7 @@ func TestUploadFile(t *testing.T) {
 						ObjectKey:        resp.ProcessedFiles[1].ObjectKey,
 						ChunkSize:        12,
 						ChunkCount:       int64(1),
+						UploadID:         "",
 					},
 				},
 				Error: nil,

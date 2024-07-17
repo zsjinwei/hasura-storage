@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/http/httputil"
 	"net/url"
 	"strconv"
 	"strings"
@@ -14,6 +15,7 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 	"github.com/nhost/hasura-storage/controller"
 	"github.com/sirupsen/logrus"
 )
@@ -158,7 +160,7 @@ func (s *S3) GetFile(
 	}, nil
 }
 
-func (s *S3) CreatePresignedURL(
+func (s *S3) CreateGetObjectPresignedURL(
 	ctx context.Context,
 	filepath string,
 	expire time.Duration,
@@ -248,6 +250,36 @@ func (s *S3) GetFileWithPresignedURL(
 	}, nil
 }
 
+func (s *S3) PutFileWithPresignedURL(
+	ctx context.Context, filepath, signature string, headers http.Header,
+) (*httputil.ReverseProxy, *controller.APIError) {
+	if s.rootFolder != "" {
+		filepath = s.rootFolder + "/" + filepath
+	}
+
+	s3Url := fmt.Sprintf("%s/%s/%s?%s", s.url, *s.bucket, filepath, signature)
+
+	u, err := url.Parse(s3Url)
+	if err != nil {
+		return nil, controller.InternalServerError(fmt.Errorf("problem parsing s3 url: %w", err))
+	}
+
+	proxy := httputil.NewSingleHostReverseProxy(u)
+	proxy.Director = func(req *http.Request) {
+		req.URL.Scheme = u.Scheme
+		req.URL.Host = u.Host
+		req.Host = u.Host
+		req.URL.Path = u.Path
+	}
+
+	proxy.ErrorHandler = func(rw http.ResponseWriter, req *http.Request, err error) {
+		ret := fmt.Sprintf("http proxy error %v", err)
+		rw.Write([]byte(ret))
+	}
+
+	return proxy, nil
+}
+
 func (s *S3) DeleteFile(ctx context.Context, filepath string) *controller.APIError {
 	key, err := url.JoinPath(s.rootFolder, filepath)
 	if err != nil {
@@ -283,4 +315,238 @@ func (s *S3) ListFiles(ctx context.Context) ([]string, *controller.APIError) {
 	}
 
 	return res, nil
+}
+
+func (s *S3) CreateMultipartUpload(
+	ctx context.Context,
+	filepath string,
+	contentType string,
+) (string, *controller.APIError) {
+	key, err := url.JoinPath(s.rootFolder, filepath)
+	if err != nil {
+		return "", controller.InternalServerError(fmt.Errorf("problem joining path: %w", err))
+	}
+
+	output, err := s.client.CreateMultipartUpload(ctx, &s3.CreateMultipartUploadInput{
+		Bucket:      s.bucket,
+		Key:         aws.String(key),
+		ContentType: aws.String(contentType),
+	})
+	if err != nil {
+		return "", controller.InternalServerError(fmt.Errorf("problem create multipart upload in s3: %w", err))
+	}
+
+	return *output.UploadId, nil
+}
+
+func (s *S3) ListParts(
+	ctx context.Context,
+	filepath string,
+	uploadId string,
+) ([]controller.MultipartFragment, *controller.APIError) {
+	key, err := url.JoinPath(s.rootFolder, filepath)
+	if err != nil {
+		return nil, controller.InternalServerError(fmt.Errorf("problem joining path: %w", err))
+	}
+
+	output, err := s.client.ListParts(ctx, &s3.ListPartsInput{
+		Bucket:   s.bucket,
+		Key:      aws.String(key),
+		UploadId: aws.String(uploadId),
+	})
+	if err != nil {
+		return nil, controller.InternalServerError(fmt.Errorf("problem list parts in s3: %w", err))
+	}
+
+	parts := make([]controller.MultipartFragment, len(output.Parts))
+	for _, part := range output.Parts {
+		parts = append(parts, controller.MultipartFragment{
+			ETag:         *part.ETag,
+			LastModified: *part.LastModified,
+			PartNumber:   *part.PartNumber,
+			Size:         *part.Size,
+		})
+	}
+
+	return parts, nil
+}
+
+func (s *S3) UploadPart(
+	ctx context.Context,
+	filepath string,
+	uploadId string,
+	partNumber int32,
+	body io.ReadSeeker,
+) (string, *controller.APIError) {
+	key, err := url.JoinPath(s.rootFolder, filepath)
+	if err != nil {
+		return "", controller.InternalServerError(fmt.Errorf("problem joining path: %w", err))
+	}
+
+	output, err := s.client.UploadPart(ctx, &s3.UploadPartInput{
+		Bucket:     s.bucket,
+		Key:        aws.String(key),
+		UploadId:   aws.String(uploadId),
+		PartNumber: aws.Int32(partNumber),
+		Body:       body,
+	})
+	if err != nil {
+		return "", controller.InternalServerError(fmt.Errorf("problem upload part in s3: %w", err))
+	}
+
+	return *output.ETag, nil
+}
+
+func (s *S3) CreatePutObjectPresignedURL(
+	ctx context.Context,
+	filepath string,
+	contentType string,
+	expire time.Duration,
+) (string, *controller.APIError) {
+	key, err := url.JoinPath(s.rootFolder, filepath)
+	if err != nil {
+		return "", controller.InternalServerError(fmt.Errorf("problem joining path: %w", err))
+	}
+
+	presignClient := s3.NewPresignClient(s.client)
+	request, err := presignClient.PresignPutObject(ctx,
+		&s3.PutObjectInput{ //nolint:exhaustivestruct
+			Bucket:      s.bucket,
+			Key:         aws.String(key),
+			ContentType: aws.String(contentType),
+		},
+		func(po *s3.PresignOptions) {
+			po.Expires = expire
+		},
+	)
+	if err != nil {
+		return "", controller.InternalServerError(
+			fmt.Errorf("problem generating pre-signed URL: %w", err),
+		)
+	}
+
+	logrus.Info(request.URL)
+
+	parts := strings.Split(request.URL, "?")
+	if len(parts) != 2 { //nolint: mnd
+		return "", controller.InternalServerError(
+			fmt.Errorf("problem generating pre-signed URL: %w", err),
+		)
+	}
+
+	return parts[1], nil
+}
+
+func (s *S3) CreateUploadPartPresignedURL(
+	ctx context.Context,
+	filepath string,
+	uploadId string,
+	partNumber int32,
+	expire time.Duration,
+) (string, *controller.APIError) {
+	key, err := url.JoinPath(s.rootFolder, filepath)
+	if err != nil {
+		return "", controller.InternalServerError(fmt.Errorf("problem joining path: %w", err))
+	}
+
+	presignClient := s3.NewPresignClient(s.client)
+	request, err := presignClient.PresignUploadPart(ctx,
+		&s3.UploadPartInput{ //nolint:exhaustivestruct
+			Bucket:     s.bucket,
+			Key:        aws.String(key),
+			PartNumber: aws.Int32(partNumber),
+			UploadId:   aws.String(uploadId),
+		},
+		func(po *s3.PresignOptions) {
+			po.Expires = expire
+		},
+	)
+	if err != nil {
+		return "", controller.InternalServerError(
+			fmt.Errorf("problem generating pre-signed URL: %w", err),
+		)
+	}
+
+	parts := strings.Split(request.URL, "?")
+	if len(parts) != 2 { //nolint: mnd
+		return "", controller.InternalServerError(
+			fmt.Errorf("problem generating pre-signed URL: %w", err),
+		)
+	}
+
+	logrus.Info(request.URL)
+
+	return parts[1], nil
+}
+
+func (s *S3) CompleteMultipartUpload(
+	ctx context.Context,
+	filepath string,
+	uploadId string,
+) (string, *controller.APIError) {
+	key, err := url.JoinPath(s.rootFolder, filepath)
+	if err != nil {
+		return "", controller.InternalServerError(fmt.Errorf("problem joining path: %w", err))
+	}
+
+	listPartsOutput, listPartsErr := s.client.ListParts(ctx, &s3.ListPartsInput{
+		Bucket:   s.bucket,
+		Key:      aws.String(key),
+		UploadId: aws.String(uploadId),
+	})
+	if listPartsErr != nil {
+		return "", controller.InternalServerError(fmt.Errorf("problem list parts in s3: %w", listPartsErr))
+	}
+
+	completedParts := make([]types.CompletedPart, 0, 10)
+	for _, part := range listPartsOutput.Parts {
+		if *part.Size == 0 {
+			continue
+		}
+		completedParts = append(completedParts, types.CompletedPart{
+			ChecksumCRC32:  part.ChecksumCRC32,
+			ChecksumCRC32C: part.ChecksumCRC32C,
+			ChecksumSHA1:   part.ChecksumSHA1,
+			ChecksumSHA256: part.ChecksumSHA256,
+			ETag:           part.ETag,
+			PartNumber:     part.PartNumber,
+		})
+	}
+
+	completeMultipartOutput, completeMultipartErr := s.client.CompleteMultipartUpload(ctx,
+		&s3.CompleteMultipartUploadInput{
+			Bucket:   s.bucket,
+			Key:      aws.String(key),
+			UploadId: aws.String(uploadId),
+			MultipartUpload: &types.CompletedMultipartUpload{
+				Parts: completedParts,
+			},
+		})
+	if completeMultipartErr != nil {
+		return "", controller.InternalServerError(fmt.Errorf("problem complete multipart upload in s3: %w", completeMultipartErr))
+	}
+
+	return *completeMultipartOutput.ETag, nil
+}
+
+func (s *S3) AbortMultipartUpload(
+	ctx context.Context,
+	filepath string,
+	uploadId string,
+) *controller.APIError {
+	key, err := url.JoinPath(s.rootFolder, filepath)
+	if err != nil {
+		return controller.InternalServerError(fmt.Errorf("problem joining path: %w", err))
+	}
+
+	if _, err := s.client.AbortMultipartUpload(ctx,
+		&s3.AbortMultipartUploadInput{
+			Bucket:   s.bucket,
+			Key:      aws.String(key),
+			UploadId: aws.String(uploadId),
+		}); err != nil {
+		return controller.InternalServerError(fmt.Errorf("problem abort multipart upload in s3: %w", err))
+	}
+
+	return nil
 }

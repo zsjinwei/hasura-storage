@@ -13,6 +13,7 @@ import (
 	context "context"
 	io "io"
 	http "net/http"
+	httputil "net/http/httputil"
 	reflect "reflect"
 	time "time"
 
@@ -52,7 +53,7 @@ func (m *MockMetadataStorage) DeleteFileByID(ctx context.Context, fileID string,
 }
 
 // DeleteFileByID indicates an expected call of DeleteFileByID.
-func (mr *MockMetadataStorageMockRecorder) DeleteFileByID(ctx, fileID, headers any) *gomock.Call {
+func (mr *MockMetadataStorageMockRecorder) DeleteFileByID(ctx, fileID, headers interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteFileByID", reflect.TypeOf((*MockMetadataStorage)(nil).DeleteFileByID), ctx, fileID, headers)
 }
@@ -67,7 +68,7 @@ func (m *MockMetadataStorage) GetBucketByID(ctx context.Context, id string, head
 }
 
 // GetBucketByID indicates an expected call of GetBucketByID.
-func (mr *MockMetadataStorageMockRecorder) GetBucketByID(ctx, id, headers any) *gomock.Call {
+func (mr *MockMetadataStorageMockRecorder) GetBucketByID(ctx, id, headers interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBucketByID", reflect.TypeOf((*MockMetadataStorage)(nil).GetBucketByID), ctx, id, headers)
 }
@@ -82,23 +83,38 @@ func (m *MockMetadataStorage) GetFileByID(ctx context.Context, id string, header
 }
 
 // GetFileByID indicates an expected call of GetFileByID.
-func (mr *MockMetadataStorageMockRecorder) GetFileByID(ctx, id, headers any) *gomock.Call {
+func (mr *MockMetadataStorageMockRecorder) GetFileByID(ctx, id, headers interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFileByID", reflect.TypeOf((*MockMetadataStorage)(nil).GetFileByID), ctx, id, headers)
 }
 
-// InitializeFile mocks base method.
-func (m *MockMetadataStorage) InitializeFile(ctx context.Context, id, name string, size int64, bucketID, mimeType string, objectKey string, chunkSize int64, chunkCount int64, headers http.Header) *controller.APIError {
+// GetFilesByETag mocks base method.
+func (m *MockMetadataStorage) GetFilesByETag(ctx context.Context, etag string, headers http.Header) ([]controller.FileMetadata, *controller.APIError) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "InitializeFile", ctx, id, name, size, bucketID, mimeType, objectKey, chunkSize, chunkCount, headers)
+	ret := m.ctrl.Call(m, "GetFilesByETag", ctx, etag, headers)
+	ret0, _ := ret[0].([]controller.FileMetadata)
+	ret1, _ := ret[1].(*controller.APIError)
+	return ret0, ret1
+}
+
+// GetFilesByETag indicates an expected call of GetFilesByETag.
+func (mr *MockMetadataStorageMockRecorder) GetFilesByETag(ctx, etag, headers interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFilesByETag", reflect.TypeOf((*MockMetadataStorage)(nil).GetFilesByETag), ctx, etag, headers)
+}
+
+// InitializeFile mocks base method.
+func (m *MockMetadataStorage) InitializeFile(ctx context.Context, id, name string, size int64, bucketID, mimeType, objectKey string, chunkSize, chunkCount int64, uploadId string, headers http.Header) *controller.APIError {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "InitializeFile", ctx, id, name, size, bucketID, mimeType, objectKey, chunkSize, chunkCount, uploadId, headers)
 	ret0, _ := ret[0].(*controller.APIError)
 	return ret0
 }
 
 // InitializeFile indicates an expected call of InitializeFile.
-func (mr *MockMetadataStorageMockRecorder) InitializeFile(ctx, id, name, size, bucketID, mimeType, objectKey, chunkSize, chunkCount, headers any) *gomock.Call {
+func (mr *MockMetadataStorageMockRecorder) InitializeFile(ctx, id, name, size, bucketID, mimeType, objectKey, chunkSize, chunkCount, uploadId, headers interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InitializeFile", reflect.TypeOf((*MockMetadataStorage)(nil).InitializeFile), ctx, id, name, size, bucketID, mimeType, objectKey, chunkSize, chunkCount, headers)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InitializeFile", reflect.TypeOf((*MockMetadataStorage)(nil).InitializeFile), ctx, id, name, size, bucketID, mimeType, objectKey, chunkSize, chunkCount, uploadId, headers)
 }
 
 // InsertVirus mocks base method.
@@ -110,7 +126,7 @@ func (m *MockMetadataStorage) InsertVirus(ctx context.Context, fileID, filename,
 }
 
 // InsertVirus indicates an expected call of InsertVirus.
-func (mr *MockMetadataStorageMockRecorder) InsertVirus(ctx, fileID, filename, virus, userSession, headers any) *gomock.Call {
+func (mr *MockMetadataStorageMockRecorder) InsertVirus(ctx, fileID, filename, virus, userSession, headers interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertVirus", reflect.TypeOf((*MockMetadataStorage)(nil).InsertVirus), ctx, fileID, filename, virus, userSession, headers)
 }
@@ -125,24 +141,24 @@ func (m *MockMetadataStorage) ListFiles(ctx context.Context, headers http.Header
 }
 
 // ListFiles indicates an expected call of ListFiles.
-func (mr *MockMetadataStorageMockRecorder) ListFiles(ctx, headers any) *gomock.Call {
+func (mr *MockMetadataStorageMockRecorder) ListFiles(ctx, headers interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListFiles", reflect.TypeOf((*MockMetadataStorage)(nil).ListFiles), ctx, headers)
 }
 
 // PopulateMetadata mocks base method.
-func (m *MockMetadataStorage) PopulateMetadata(ctx context.Context, id, name string, size int64, bucketID, etag string, IsUploaded bool, mimeType string, objectKey string, chunkSize int64, chunkCount int64, metadata map[string]any, headers http.Header) (controller.FileMetadata, *controller.APIError) {
+func (m *MockMetadataStorage) PopulateMetadata(ctx context.Context, id, name string, size int64, bucketID, etag string, IsUploaded bool, mimeType, objectKey string, chunkSize, chunkCount int64, uploadId string, metadata map[string]any, headers http.Header) (controller.FileMetadata, *controller.APIError) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "PopulateMetadata", ctx, id, name, size, bucketID, etag, IsUploaded, mimeType, objectKey, chunkSize, chunkCount, metadata, headers)
+	ret := m.ctrl.Call(m, "PopulateMetadata", ctx, id, name, size, bucketID, etag, IsUploaded, mimeType, objectKey, chunkSize, chunkCount, uploadId, metadata, headers)
 	ret0, _ := ret[0].(controller.FileMetadata)
 	ret1, _ := ret[1].(*controller.APIError)
 	return ret0, ret1
 }
 
 // PopulateMetadata indicates an expected call of PopulateMetadata.
-func (mr *MockMetadataStorageMockRecorder) PopulateMetadata(ctx, id, name, size, bucketID, etag, IsUploaded, mimeType, objectKey, chunkSize, chunkCount, metadata, headers any) *gomock.Call {
+func (mr *MockMetadataStorageMockRecorder) PopulateMetadata(ctx, id, name, size, bucketID, etag, IsUploaded, mimeType, objectKey, chunkSize, chunkCount, uploadId, metadata, headers interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PopulateMetadata", reflect.TypeOf((*MockMetadataStorage)(nil).PopulateMetadata), ctx, id, name, size, bucketID, etag, IsUploaded, mimeType, objectKey, chunkSize, chunkCount, metadata, headers)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PopulateMetadata", reflect.TypeOf((*MockMetadataStorage)(nil).PopulateMetadata), ctx, id, name, size, bucketID, etag, IsUploaded, mimeType, objectKey, chunkSize, chunkCount, uploadId, metadata, headers)
 }
 
 // SetIsUploaded mocks base method.
@@ -154,7 +170,7 @@ func (m *MockMetadataStorage) SetIsUploaded(ctx context.Context, fileID string, 
 }
 
 // SetIsUploaded indicates an expected call of SetIsUploaded.
-func (mr *MockMetadataStorageMockRecorder) SetIsUploaded(ctx, fileID, isUploaded, headers any) *gomock.Call {
+func (mr *MockMetadataStorageMockRecorder) SetIsUploaded(ctx, fileID, isUploaded, headers interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetIsUploaded", reflect.TypeOf((*MockMetadataStorage)(nil).SetIsUploaded), ctx, fileID, isUploaded, headers)
 }
@@ -182,19 +198,93 @@ func (m *MockContentStorage) EXPECT() *MockContentStorageMockRecorder {
 	return m.recorder
 }
 
-// CreatePresignedURL mocks base method.
-func (m *MockContentStorage) CreatePresignedURL(ctx context.Context, filepath string, expire time.Duration) (string, *controller.APIError) {
+// AbortMultipartUpload mocks base method.
+func (m *MockContentStorage) AbortMultipartUpload(ctx context.Context, filepath, uploadId string) *controller.APIError {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreatePresignedURL", ctx, filepath, expire)
+	ret := m.ctrl.Call(m, "AbortMultipartUpload", ctx, filepath, uploadId)
+	ret0, _ := ret[0].(*controller.APIError)
+	return ret0
+}
+
+// AbortMultipartUpload indicates an expected call of AbortMultipartUpload.
+func (mr *MockContentStorageMockRecorder) AbortMultipartUpload(ctx, filepath, uploadId interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AbortMultipartUpload", reflect.TypeOf((*MockContentStorage)(nil).AbortMultipartUpload), ctx, filepath, uploadId)
+}
+
+// CompleteMultipartUpload mocks base method.
+func (m *MockContentStorage) CompleteMultipartUpload(ctx context.Context, filepath, uploadId string) (string, *controller.APIError) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CompleteMultipartUpload", ctx, filepath, uploadId)
 	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(*controller.APIError)
 	return ret0, ret1
 }
 
-// CreatePresignedURL indicates an expected call of CreatePresignedURL.
-func (mr *MockContentStorageMockRecorder) CreatePresignedURL(ctx, filepath, expire any) *gomock.Call {
+// CompleteMultipartUpload indicates an expected call of CompleteMultipartUpload.
+func (mr *MockContentStorageMockRecorder) CompleteMultipartUpload(ctx, filepath, uploadId interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreatePresignedURL", reflect.TypeOf((*MockContentStorage)(nil).CreatePresignedURL), ctx, filepath, expire)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CompleteMultipartUpload", reflect.TypeOf((*MockContentStorage)(nil).CompleteMultipartUpload), ctx, filepath, uploadId)
+}
+
+// CreateGetObjectPresignedURL mocks base method.
+func (m *MockContentStorage) CreateGetObjectPresignedURL(ctx context.Context, filepath string, expire time.Duration) (string, *controller.APIError) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateGetObjectPresignedURL", ctx, filepath, expire)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(*controller.APIError)
+	return ret0, ret1
+}
+
+// CreateGetObjectPresignedURL indicates an expected call of CreateGetObjectPresignedURL.
+func (mr *MockContentStorageMockRecorder) CreateGetObjectPresignedURL(ctx, filepath, expire interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateGetObjectPresignedURL", reflect.TypeOf((*MockContentStorage)(nil).CreateGetObjectPresignedURL), ctx, filepath, expire)
+}
+
+// CreateMultipartUpload mocks base method.
+func (m *MockContentStorage) CreateMultipartUpload(ctx context.Context, filepath, contentType string) (string, *controller.APIError) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateMultipartUpload", ctx, filepath, contentType)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(*controller.APIError)
+	return ret0, ret1
+}
+
+// CreateMultipartUpload indicates an expected call of CreateMultipartUpload.
+func (mr *MockContentStorageMockRecorder) CreateMultipartUpload(ctx, filepath, contentType interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateMultipartUpload", reflect.TypeOf((*MockContentStorage)(nil).CreateMultipartUpload), ctx, filepath, contentType)
+}
+
+// CreatePutObjectPresignedURL mocks base method.
+func (m *MockContentStorage) CreatePutObjectPresignedURL(ctx context.Context, filepath, contentType string, expire time.Duration) (string, *controller.APIError) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreatePutObjectPresignedURL", ctx, filepath, contentType, expire)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(*controller.APIError)
+	return ret0, ret1
+}
+
+// CreatePutObjectPresignedURL indicates an expected call of CreatePutObjectPresignedURL.
+func (mr *MockContentStorageMockRecorder) CreatePutObjectPresignedURL(ctx, filepath, contentType, expire interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreatePutObjectPresignedURL", reflect.TypeOf((*MockContentStorage)(nil).CreatePutObjectPresignedURL), ctx, filepath, contentType, expire)
+}
+
+// CreateUploadPartPresignedURL mocks base method.
+func (m *MockContentStorage) CreateUploadPartPresignedURL(ctx context.Context, filepath, uploadId string, partNumber int32, expire time.Duration) (string, *controller.APIError) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateUploadPartPresignedURL", ctx, filepath, uploadId, partNumber, expire)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(*controller.APIError)
+	return ret0, ret1
+}
+
+// CreateUploadPartPresignedURL indicates an expected call of CreateUploadPartPresignedURL.
+func (mr *MockContentStorageMockRecorder) CreateUploadPartPresignedURL(ctx, filepath, uploadId, partNumber, expire interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateUploadPartPresignedURL", reflect.TypeOf((*MockContentStorage)(nil).CreateUploadPartPresignedURL), ctx, filepath, uploadId, partNumber, expire)
 }
 
 // DeleteFile mocks base method.
@@ -206,7 +296,7 @@ func (m *MockContentStorage) DeleteFile(ctx context.Context, filepath string) *c
 }
 
 // DeleteFile indicates an expected call of DeleteFile.
-func (mr *MockContentStorageMockRecorder) DeleteFile(ctx, filepath any) *gomock.Call {
+func (mr *MockContentStorageMockRecorder) DeleteFile(ctx, filepath interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteFile", reflect.TypeOf((*MockContentStorage)(nil).DeleteFile), ctx, filepath)
 }
@@ -221,7 +311,7 @@ func (m *MockContentStorage) GetFile(ctx context.Context, filepath string, heade
 }
 
 // GetFile indicates an expected call of GetFile.
-func (mr *MockContentStorageMockRecorder) GetFile(ctx, filepath, headers any) *gomock.Call {
+func (mr *MockContentStorageMockRecorder) GetFile(ctx, filepath, headers interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFile", reflect.TypeOf((*MockContentStorage)(nil).GetFile), ctx, filepath, headers)
 }
@@ -236,7 +326,7 @@ func (m *MockContentStorage) GetFileWithPresignedURL(ctx context.Context, filepa
 }
 
 // GetFileWithPresignedURL indicates an expected call of GetFileWithPresignedURL.
-func (mr *MockContentStorageMockRecorder) GetFileWithPresignedURL(ctx, filepath, signature, headers any) *gomock.Call {
+func (mr *MockContentStorageMockRecorder) GetFileWithPresignedURL(ctx, filepath, signature, headers interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFileWithPresignedURL", reflect.TypeOf((*MockContentStorage)(nil).GetFileWithPresignedURL), ctx, filepath, signature, headers)
 }
@@ -251,9 +341,24 @@ func (m *MockContentStorage) ListFiles(ctx context.Context) ([]string, *controll
 }
 
 // ListFiles indicates an expected call of ListFiles.
-func (mr *MockContentStorageMockRecorder) ListFiles(ctx any) *gomock.Call {
+func (mr *MockContentStorageMockRecorder) ListFiles(ctx interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListFiles", reflect.TypeOf((*MockContentStorage)(nil).ListFiles), ctx)
+}
+
+// ListParts mocks base method.
+func (m *MockContentStorage) ListParts(ctx context.Context, filepath, uploadId string) ([]controller.MultipartFragment, *controller.APIError) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListParts", ctx, filepath, uploadId)
+	ret0, _ := ret[0].([]controller.MultipartFragment)
+	ret1, _ := ret[1].(*controller.APIError)
+	return ret0, ret1
+}
+
+// ListParts indicates an expected call of ListParts.
+func (mr *MockContentStorageMockRecorder) ListParts(ctx, filepath, uploadId interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListParts", reflect.TypeOf((*MockContentStorage)(nil).ListParts), ctx, filepath, uploadId)
 }
 
 // PutFile mocks base method.
@@ -266,9 +371,39 @@ func (m *MockContentStorage) PutFile(ctx context.Context, content io.ReadSeeker,
 }
 
 // PutFile indicates an expected call of PutFile.
-func (mr *MockContentStorageMockRecorder) PutFile(ctx, content, filepath, contentType any) *gomock.Call {
+func (mr *MockContentStorageMockRecorder) PutFile(ctx, content, filepath, contentType interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PutFile", reflect.TypeOf((*MockContentStorage)(nil).PutFile), ctx, content, filepath, contentType)
+}
+
+// PutFileWithPresignedURL mocks base method.
+func (m *MockContentStorage) PutFileWithPresignedURL(ctx context.Context, filepath, signature string, headers http.Header) (*httputil.ReverseProxy, *controller.APIError) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "PutFileWithPresignedURL", ctx, filepath, signature, headers)
+	ret0, _ := ret[0].(*httputil.ReverseProxy)
+	ret1, _ := ret[1].(*controller.APIError)
+	return ret0, ret1
+}
+
+// PutFileWithPresignedURL indicates an expected call of PutFileWithPresignedURL.
+func (mr *MockContentStorageMockRecorder) PutFileWithPresignedURL(ctx, filepath, signature, headers interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PutFileWithPresignedURL", reflect.TypeOf((*MockContentStorage)(nil).PutFileWithPresignedURL), ctx, filepath, signature, headers)
+}
+
+// UploadPart mocks base method.
+func (m *MockContentStorage) UploadPart(ctx context.Context, filepath, uploadId string, partNumber int32, body io.ReadSeeker) (string, *controller.APIError) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UploadPart", ctx, filepath, uploadId, partNumber, body)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(*controller.APIError)
+	return ret0, ret1
+}
+
+// UploadPart indicates an expected call of UploadPart.
+func (mr *MockContentStorageMockRecorder) UploadPart(ctx, filepath, uploadId, partNumber, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UploadPart", reflect.TypeOf((*MockContentStorage)(nil).UploadPart), ctx, filepath, uploadId, partNumber, body)
 }
 
 // MockAntivirus is a mock of Antivirus interface.
@@ -303,7 +438,7 @@ func (m *MockAntivirus) ScanReader(r io.ReaderAt) *controller.APIError {
 }
 
 // ScanReader indicates an expected call of ScanReader.
-func (mr *MockAntivirusMockRecorder) ScanReader(r any) *gomock.Call {
+func (mr *MockAntivirusMockRecorder) ScanReader(r interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ScanReader", reflect.TypeOf((*MockAntivirus)(nil).ScanReader), r)
 }

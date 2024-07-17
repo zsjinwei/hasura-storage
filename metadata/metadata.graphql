@@ -13,6 +13,7 @@ fragment FileMetadataFragment on files {
   objectKey
   chunkSize
   chunkCount
+  uploadId
 }
 
 fragment FileMetadataSummaryFragment on files {
@@ -31,6 +32,7 @@ fragment BucketMetadataFragment on buckets {
   createdAt
   updatedAt
   cacheControl
+  uploadExpiration
 }
 
 query GetBucket($id: String!) {
@@ -41,6 +43,12 @@ query GetBucket($id: String!) {
 
 query GetFile($id: uuid!) {
   file(id: $id) {
+    ...FileMetadataFragment
+  }
+}
+
+query GetFilesByETag($etag: String!) {
+  files(where: {etag: {_eq: $etag}}, order_by: {createdAt: desc}) {
     ...FileMetadataFragment
   }
 }

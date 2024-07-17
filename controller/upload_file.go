@@ -121,7 +121,7 @@ func (ctrl *Controller) processFile(
 	defer fileContent.Close()
 
 	if err := ctrl.metadataStorage.InitializeFile(
-		ctx, file.ID, file.Name, file.header.Size, bucket.ID, contentType, objectKey, file.header.Size, 1, headers,
+		ctx, file.ID, file.Name, file.header.Size, bucket.ID, contentType, objectKey, file.header.Size, 1, "", headers,
 	); err != nil {
 		return FileMetadata{}, err
 	}
@@ -144,7 +144,7 @@ func (ctrl *Controller) processFile(
 
 	metadata, apiErr := ctrl.metadataStorage.PopulateMetadata(
 		ctx,
-		file.ID, file.Name, file.header.Size, bucket.ID, etag, true, contentType, objectKey, file.header.Size, 1, file.Metadata,
+		file.ID, file.Name, file.header.Size, bucket.ID, etag, true, contentType, objectKey, file.header.Size, 1, "", file.Metadata,
 		http.Header{"x-hasura-admin-secret": []string{ctrl.hasuraAdminSecret}},
 	)
 	if apiErr != nil {

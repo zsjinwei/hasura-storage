@@ -76,11 +76,12 @@ type Buckets struct {
 	Files []*Files `json:"files"`
 	// An aggregate relationship
 	FilesAggregate       FilesAggregate `json:"files_aggregate"`
-	ID                   string         `json:"id"`
-	MaxUploadFileSize    int64          `json:"maxUploadFileSize"`
-	MinUploadFileSize    int64          `json:"minUploadFileSize"`
-	PresignedUrlsEnabled bool           `json:"presignedUrlsEnabled"`
-	UpdatedAt            string         `json:"updatedAt"`
+	ID                   string          `json:"id"`
+	MaxUploadFileSize    int64           `json:"maxUploadFileSize"`
+	MinUploadFileSize    int64           `json:"minUploadFileSize"`
+	PresignedUrlsEnabled bool            `json:"presignedUrlsEnabled"`
+	UpdatedAt            string          `json:"updatedAt"`
+	UploadExpiration     int64           `json:"uploadExpiration"`
 }
 
 // aggregated selection of "storage.buckets"
@@ -109,6 +110,7 @@ type BucketsAvgFields struct {
 	DownloadExpiration *float64 `json:"downloadExpiration,omitempty"`
 	MaxUploadFileSize  *float64 `json:"maxUploadFileSize,omitempty"`
 	MinUploadFileSize  *float64 `json:"minUploadFileSize,omitempty"`
+	UploadExpiration   *float64 `json:"uploadExpiration,omitempty"`
 }
 
 // Boolean expression to filter rows from the table "storage.buckets". All fields are combined with a logical 'AND'.
@@ -126,6 +128,7 @@ type BucketsBoolExp struct {
 	MinUploadFileSize    *IntComparisonExp         `json:"minUploadFileSize,omitempty"`
 	PresignedUrlsEnabled *BooleanComparisonExp     `json:"presignedUrlsEnabled,omitempty"`
 	UpdatedAt            *TimestamptzComparisonExp `json:"updatedAt,omitempty"`
+	UploadExpiration     *IntComparisonExp         `json:"uploadExpiration,omitempty"`
 }
 
 // input type for incrementing numeric columns in table "storage.buckets"
@@ -133,6 +136,7 @@ type BucketsIncInput struct {
 	DownloadExpiration *int64 `json:"downloadExpiration,omitempty"`
 	MaxUploadFileSize  *int64 `json:"maxUploadFileSize,omitempty"`
 	MinUploadFileSize  *int64 `json:"minUploadFileSize,omitempty"`
+	UploadExpiration   *int64 `json:"uploadExpiration,omitempty"`
 }
 
 // input type for inserting data into table "storage.buckets"
@@ -146,6 +150,7 @@ type BucketsInsertInput struct {
 	MinUploadFileSize    *int64                  `json:"minUploadFileSize,omitempty"`
 	PresignedUrlsEnabled *bool                   `json:"presignedUrlsEnabled,omitempty"`
 	UpdatedAt            *string                 `json:"updatedAt,omitempty"`
+	UploadExpiration     *int64                  `json:"uploadExpiration,omitempty"`
 }
 
 // aggregate max on columns
@@ -157,6 +162,7 @@ type BucketsMaxFields struct {
 	MaxUploadFileSize  *int64  `json:"maxUploadFileSize,omitempty"`
 	MinUploadFileSize  *int64  `json:"minUploadFileSize,omitempty"`
 	UpdatedAt          *string `json:"updatedAt,omitempty"`
+	UploadExpiration   *int64  `json:"uploadExpiration,omitempty"`
 }
 
 // aggregate min on columns
@@ -168,6 +174,7 @@ type BucketsMinFields struct {
 	MaxUploadFileSize  *int64  `json:"maxUploadFileSize,omitempty"`
 	MinUploadFileSize  *int64  `json:"minUploadFileSize,omitempty"`
 	UpdatedAt          *string `json:"updatedAt,omitempty"`
+	UploadExpiration   *int64  `json:"uploadExpiration,omitempty"`
 }
 
 // response of any mutation on the table "storage.buckets"
@@ -203,6 +210,7 @@ type BucketsOrderBy struct {
 	MinUploadFileSize    *OrderBy               `json:"minUploadFileSize,omitempty"`
 	PresignedUrlsEnabled *OrderBy               `json:"presignedUrlsEnabled,omitempty"`
 	UpdatedAt            *OrderBy               `json:"updatedAt,omitempty"`
+	UploadExpiration     *OrderBy               `json:"uploadExpiration,omitempty"`
 }
 
 // primary key columns input for table: storage.buckets
@@ -220,6 +228,7 @@ type BucketsSetInput struct {
 	MinUploadFileSize    *int64  `json:"minUploadFileSize,omitempty"`
 	PresignedUrlsEnabled *bool   `json:"presignedUrlsEnabled,omitempty"`
 	UpdatedAt            *string `json:"updatedAt,omitempty"`
+	UploadExpiration     *int64  `json:"uploadExpiration,omitempty"`
 }
 
 // aggregate stddev on columns
@@ -227,6 +236,7 @@ type BucketsStddevFields struct {
 	DownloadExpiration *float64 `json:"downloadExpiration,omitempty"`
 	MaxUploadFileSize  *float64 `json:"maxUploadFileSize,omitempty"`
 	MinUploadFileSize  *float64 `json:"minUploadFileSize,omitempty"`
+	UploadExpiration   *float64 `json:"uploadExpiration,omitempty"`
 }
 
 // aggregate stddev_pop on columns
@@ -234,6 +244,7 @@ type BucketsStddevPopFields struct {
 	DownloadExpiration *float64 `json:"downloadExpiration,omitempty"`
 	MaxUploadFileSize  *float64 `json:"maxUploadFileSize,omitempty"`
 	MinUploadFileSize  *float64 `json:"minUploadFileSize,omitempty"`
+	UploadExpiration   *float64 `json:"uploadExpiration,omitempty"`
 }
 
 // aggregate stddev_samp on columns
@@ -241,6 +252,7 @@ type BucketsStddevSampFields struct {
 	DownloadExpiration *float64 `json:"downloadExpiration,omitempty"`
 	MaxUploadFileSize  *float64 `json:"maxUploadFileSize,omitempty"`
 	MinUploadFileSize  *float64 `json:"minUploadFileSize,omitempty"`
+	UploadExpiration   *float64 `json:"uploadExpiration,omitempty"`
 }
 
 // Streaming cursor of the table "buckets"
@@ -261,6 +273,7 @@ type BucketsStreamCursorValueInput struct {
 	MinUploadFileSize    *int64  `json:"minUploadFileSize,omitempty"`
 	PresignedUrlsEnabled *bool   `json:"presignedUrlsEnabled,omitempty"`
 	UpdatedAt            *string `json:"updatedAt,omitempty"`
+	UploadExpiration     *int64  `json:"uploadExpiration,omitempty"`
 }
 
 // aggregate sum on columns
@@ -268,6 +281,7 @@ type BucketsSumFields struct {
 	DownloadExpiration *int64 `json:"downloadExpiration,omitempty"`
 	MaxUploadFileSize  *int64 `json:"maxUploadFileSize,omitempty"`
 	MinUploadFileSize  *int64 `json:"minUploadFileSize,omitempty"`
+	UploadExpiration   *int64 `json:"uploadExpiration,omitempty"`
 }
 
 type BucketsUpdates struct {
@@ -284,6 +298,7 @@ type BucketsVarPopFields struct {
 	DownloadExpiration *float64 `json:"downloadExpiration,omitempty"`
 	MaxUploadFileSize  *float64 `json:"maxUploadFileSize,omitempty"`
 	MinUploadFileSize  *float64 `json:"minUploadFileSize,omitempty"`
+	UploadExpiration   *float64 `json:"uploadExpiration,omitempty"`
 }
 
 // aggregate var_samp on columns
@@ -291,6 +306,7 @@ type BucketsVarSampFields struct {
 	DownloadExpiration *float64 `json:"downloadExpiration,omitempty"`
 	MaxUploadFileSize  *float64 `json:"maxUploadFileSize,omitempty"`
 	MinUploadFileSize  *float64 `json:"minUploadFileSize,omitempty"`
+	UploadExpiration   *float64 `json:"uploadExpiration,omitempty"`
 }
 
 // aggregate variance on columns
@@ -298,6 +314,7 @@ type BucketsVarianceFields struct {
 	DownloadExpiration *float64 `json:"downloadExpiration,omitempty"`
 	MaxUploadFileSize  *float64 `json:"maxUploadFileSize,omitempty"`
 	MinUploadFileSize  *float64 `json:"minUploadFileSize,omitempty"`
+	UploadExpiration   *float64 `json:"uploadExpiration,omitempty"`
 }
 
 // columns and relationships of "storage.files"
@@ -317,6 +334,7 @@ type Files struct {
 	ObjectKey        *string                `json:"objectKey,omitempty"`
 	Size             *int64                 `json:"size,omitempty"`
 	UpdatedAt        string                 `json:"updatedAt"`
+	UploadID         *string                `json:"uploadId,omitempty"`
 	UploadedByUserID *string                `json:"uploadedByUserId,omitempty"`
 }
 
@@ -428,6 +446,7 @@ type FilesBoolExp struct {
 	ObjectKey        *StringComparisonExp      `json:"objectKey,omitempty"`
 	Size             *IntComparisonExp         `json:"size,omitempty"`
 	UpdatedAt        *TimestamptzComparisonExp `json:"updatedAt,omitempty"`
+	UploadID         *StringComparisonExp      `json:"uploadId,omitempty"`
 	UploadedByUserID *UUIDComparisonExp        `json:"uploadedByUserId,omitempty"`
 }
 
@@ -469,6 +488,7 @@ type FilesInsertInput struct {
 	ObjectKey        *string                   `json:"objectKey,omitempty"`
 	Size             *int64                    `json:"size,omitempty"`
 	UpdatedAt        *string                   `json:"updatedAt,omitempty"`
+	UploadID         *string                   `json:"uploadId,omitempty"`
 	UploadedByUserID *string                   `json:"uploadedByUserId,omitempty"`
 }
 
@@ -485,6 +505,7 @@ type FilesMaxFields struct {
 	ObjectKey        *string `json:"objectKey,omitempty"`
 	Size             *int64  `json:"size,omitempty"`
 	UpdatedAt        *string `json:"updatedAt,omitempty"`
+	UploadID         *string `json:"uploadId,omitempty"`
 	UploadedByUserID *string `json:"uploadedByUserId,omitempty"`
 }
 
@@ -501,6 +522,7 @@ type FilesMaxOrderBy struct {
 	ObjectKey        *OrderBy `json:"objectKey,omitempty"`
 	Size             *OrderBy `json:"size,omitempty"`
 	UpdatedAt        *OrderBy `json:"updatedAt,omitempty"`
+	UploadID         *OrderBy `json:"uploadId,omitempty"`
 	UploadedByUserID *OrderBy `json:"uploadedByUserId,omitempty"`
 }
 
@@ -517,6 +539,7 @@ type FilesMinFields struct {
 	ObjectKey        *string `json:"objectKey,omitempty"`
 	Size             *int64  `json:"size,omitempty"`
 	UpdatedAt        *string `json:"updatedAt,omitempty"`
+	UploadID         *string `json:"uploadId,omitempty"`
 	UploadedByUserID *string `json:"uploadedByUserId,omitempty"`
 }
 
@@ -533,6 +556,7 @@ type FilesMinOrderBy struct {
 	ObjectKey        *OrderBy `json:"objectKey,omitempty"`
 	Size             *OrderBy `json:"size,omitempty"`
 	UpdatedAt        *OrderBy `json:"updatedAt,omitempty"`
+	UploadID         *OrderBy `json:"uploadId,omitempty"`
 	UploadedByUserID *OrderBy `json:"uploadedByUserId,omitempty"`
 }
 
@@ -574,6 +598,7 @@ type FilesOrderBy struct {
 	ObjectKey        *OrderBy        `json:"objectKey,omitempty"`
 	Size             *OrderBy        `json:"size,omitempty"`
 	UpdatedAt        *OrderBy        `json:"updatedAt,omitempty"`
+	UploadID         *OrderBy        `json:"uploadId,omitempty"`
 	UploadedByUserID *OrderBy        `json:"uploadedByUserId,omitempty"`
 }
 
@@ -602,6 +627,7 @@ type FilesSetInput struct {
 	ObjectKey        *string                `json:"objectKey,omitempty"`
 	Size             *int64                 `json:"size,omitempty"`
 	UpdatedAt        *string                `json:"updatedAt,omitempty"`
+	UploadID         *string                `json:"uploadId,omitempty"`
 	UploadedByUserID *string                `json:"uploadedByUserId,omitempty"`
 }
 
@@ -670,6 +696,7 @@ type FilesStreamCursorValueInput struct {
 	ObjectKey        *string                `json:"objectKey,omitempty"`
 	Size             *int64                 `json:"size,omitempty"`
 	UpdatedAt        *string                `json:"updatedAt,omitempty"`
+	UploadID         *string                `json:"uploadId,omitempty"`
 	UploadedByUserID *string                `json:"uploadedByUserId,omitempty"`
 }
 
@@ -1067,6 +1094,8 @@ const (
 	BucketsSelectColumnPresignedUrlsEnabled BucketsSelectColumn = "presignedUrlsEnabled"
 	// column name
 	BucketsSelectColumnUpdatedAt BucketsSelectColumn = "updatedAt"
+	// column name
+	BucketsSelectColumnUploadExpiration BucketsSelectColumn = "uploadExpiration"
 )
 
 var AllBucketsSelectColumn = []BucketsSelectColumn{
@@ -1078,11 +1107,12 @@ var AllBucketsSelectColumn = []BucketsSelectColumn{
 	BucketsSelectColumnMinUploadFileSize,
 	BucketsSelectColumnPresignedUrlsEnabled,
 	BucketsSelectColumnUpdatedAt,
+	BucketsSelectColumnUploadExpiration,
 }
 
 func (e BucketsSelectColumn) IsValid() bool {
 	switch e {
-	case BucketsSelectColumnCacheControl, BucketsSelectColumnCreatedAt, BucketsSelectColumnDownloadExpiration, BucketsSelectColumnID, BucketsSelectColumnMaxUploadFileSize, BucketsSelectColumnMinUploadFileSize, BucketsSelectColumnPresignedUrlsEnabled, BucketsSelectColumnUpdatedAt:
+	case BucketsSelectColumnCacheControl, BucketsSelectColumnCreatedAt, BucketsSelectColumnDownloadExpiration, BucketsSelectColumnID, BucketsSelectColumnMaxUploadFileSize, BucketsSelectColumnMinUploadFileSize, BucketsSelectColumnPresignedUrlsEnabled, BucketsSelectColumnUpdatedAt, BucketsSelectColumnUploadExpiration:
 		return true
 	}
 	return false
@@ -1129,6 +1159,8 @@ const (
 	BucketsUpdateColumnPresignedUrlsEnabled BucketsUpdateColumn = "presignedUrlsEnabled"
 	// column name
 	BucketsUpdateColumnUpdatedAt BucketsUpdateColumn = "updatedAt"
+	// column name
+	BucketsUpdateColumnUploadExpiration BucketsUpdateColumn = "uploadExpiration"
 )
 
 var AllBucketsUpdateColumn = []BucketsUpdateColumn{
@@ -1140,11 +1172,12 @@ var AllBucketsUpdateColumn = []BucketsUpdateColumn{
 	BucketsUpdateColumnMinUploadFileSize,
 	BucketsUpdateColumnPresignedUrlsEnabled,
 	BucketsUpdateColumnUpdatedAt,
+	BucketsUpdateColumnUploadExpiration,
 }
 
 func (e BucketsUpdateColumn) IsValid() bool {
 	switch e {
-	case BucketsUpdateColumnCacheControl, BucketsUpdateColumnCreatedAt, BucketsUpdateColumnDownloadExpiration, BucketsUpdateColumnID, BucketsUpdateColumnMaxUploadFileSize, BucketsUpdateColumnMinUploadFileSize, BucketsUpdateColumnPresignedUrlsEnabled, BucketsUpdateColumnUpdatedAt:
+	case BucketsUpdateColumnCacheControl, BucketsUpdateColumnCreatedAt, BucketsUpdateColumnDownloadExpiration, BucketsUpdateColumnID, BucketsUpdateColumnMaxUploadFileSize, BucketsUpdateColumnMinUploadFileSize, BucketsUpdateColumnPresignedUrlsEnabled, BucketsUpdateColumnUpdatedAt, BucketsUpdateColumnUploadExpiration:
 		return true
 	}
 	return false
@@ -1287,6 +1320,8 @@ const (
 	// column name
 	FilesSelectColumnUpdatedAt FilesSelectColumn = "updatedAt"
 	// column name
+	FilesSelectColumnUploadID FilesSelectColumn = "uploadId"
+	// column name
 	FilesSelectColumnUploadedByUserID FilesSelectColumn = "uploadedByUserId"
 )
 
@@ -1304,12 +1339,13 @@ var AllFilesSelectColumn = []FilesSelectColumn{
 	FilesSelectColumnObjectKey,
 	FilesSelectColumnSize,
 	FilesSelectColumnUpdatedAt,
+	FilesSelectColumnUploadID,
 	FilesSelectColumnUploadedByUserID,
 }
 
 func (e FilesSelectColumn) IsValid() bool {
 	switch e {
-	case FilesSelectColumnBucketID, FilesSelectColumnChunkCount, FilesSelectColumnChunkSize, FilesSelectColumnCreatedAt, FilesSelectColumnEtag, FilesSelectColumnID, FilesSelectColumnIsUploaded, FilesSelectColumnMetadata, FilesSelectColumnMimeType, FilesSelectColumnName, FilesSelectColumnObjectKey, FilesSelectColumnSize, FilesSelectColumnUpdatedAt, FilesSelectColumnUploadedByUserID:
+	case FilesSelectColumnBucketID, FilesSelectColumnChunkCount, FilesSelectColumnChunkSize, FilesSelectColumnCreatedAt, FilesSelectColumnEtag, FilesSelectColumnID, FilesSelectColumnIsUploaded, FilesSelectColumnMetadata, FilesSelectColumnMimeType, FilesSelectColumnName, FilesSelectColumnObjectKey, FilesSelectColumnSize, FilesSelectColumnUpdatedAt, FilesSelectColumnUploadID, FilesSelectColumnUploadedByUserID:
 		return true
 	}
 	return false
@@ -1449,6 +1485,8 @@ const (
 	// column name
 	FilesUpdateColumnUpdatedAt FilesUpdateColumn = "updatedAt"
 	// column name
+	FilesUpdateColumnUploadID FilesUpdateColumn = "uploadId"
+	// column name
 	FilesUpdateColumnUploadedByUserID FilesUpdateColumn = "uploadedByUserId"
 )
 
@@ -1466,12 +1504,13 @@ var AllFilesUpdateColumn = []FilesUpdateColumn{
 	FilesUpdateColumnObjectKey,
 	FilesUpdateColumnSize,
 	FilesUpdateColumnUpdatedAt,
+	FilesUpdateColumnUploadID,
 	FilesUpdateColumnUploadedByUserID,
 }
 
 func (e FilesUpdateColumn) IsValid() bool {
 	switch e {
-	case FilesUpdateColumnBucketID, FilesUpdateColumnChunkCount, FilesUpdateColumnChunkSize, FilesUpdateColumnCreatedAt, FilesUpdateColumnEtag, FilesUpdateColumnID, FilesUpdateColumnIsUploaded, FilesUpdateColumnMetadata, FilesUpdateColumnMimeType, FilesUpdateColumnName, FilesUpdateColumnObjectKey, FilesUpdateColumnSize, FilesUpdateColumnUpdatedAt, FilesUpdateColumnUploadedByUserID:
+	case FilesUpdateColumnBucketID, FilesUpdateColumnChunkCount, FilesUpdateColumnChunkSize, FilesUpdateColumnCreatedAt, FilesUpdateColumnEtag, FilesUpdateColumnID, FilesUpdateColumnIsUploaded, FilesUpdateColumnMetadata, FilesUpdateColumnMimeType, FilesUpdateColumnName, FilesUpdateColumnObjectKey, FilesUpdateColumnSize, FilesUpdateColumnUpdatedAt, FilesUpdateColumnUploadID, FilesUpdateColumnUploadedByUserID:
 		return true
 	}
 	return false

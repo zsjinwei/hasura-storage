@@ -54,6 +54,7 @@ func TestGetBucketByID(t *testing.T) {
 				CreatedAt:            "",
 				UpdatedAt:            "",
 				CacheControl:         "max-age=3600",
+				UploadExpiration:     600,
 			},
 		},
 		{
@@ -218,6 +219,7 @@ func TestPopulateMetadata(t *testing.T) {
 				ObjectKey:        fileID,
 				ChunkSize:        123,
 				ChunkCount:       1,
+				UploadID:         "",
 			},
 		},
 		{
@@ -335,6 +337,7 @@ func TestGetFileByID(t *testing.T) {
 				ObjectKey:        fileID,
 				ChunkSize:        123,
 				ChunkCount:       1,
+				UploadID:         "",
 			},
 		},
 		{

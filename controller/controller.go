@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/http/httputil"
 	"time"
 
 	"github.com/gin-contrib/cors"
@@ -30,6 +31,7 @@ type BucketMetadata struct {
 	CreatedAt            string
 	UpdatedAt            string
 	CacheControl         string
+	UploadExpiration     int
 }
 
 type FileMetadata struct {
@@ -47,21 +49,23 @@ type FileMetadata struct {
 	ObjectKey        string         `json:"objectKey"`
 	ChunkSize        int64          `json:"chunkSize"`
 	ChunkCount       int64          `json:"chunkCount"`
+	UploadID         string         `json:"uploadId"`
 }
 
 type MetadataStorage interface {
 	GetBucketByID(ctx context.Context, id string, headers http.Header) (BucketMetadata, *APIError)
 	GetFileByID(ctx context.Context, id string, headers http.Header) (FileMetadata, *APIError)
+	GetFilesByETag(ctx context.Context, etag string, headers http.Header) ([]FileMetadata, *APIError)
 	InitializeFile(
 		ctx context.Context,
 		id, name string, size int64, bucketID, mimeType string,
-		objectKey string, chunkSize int64, chunkCount int64,
+		objectKey string, chunkSize int64, chunkCount int64, uploadId string,
 		headers http.Header,
 	) *APIError
 	PopulateMetadata(
 		ctx context.Context,
 		id, name string, size int64, bucketID, etag string, IsUploaded bool, mimeType string,
-		objectKey string, chunkSize int64, chunkCount int64,
+		objectKey string, chunkSize int64, chunkCount int64, uploadId string,
 		metadata map[string]any,
 		headers http.Header) (FileMetadata, *APIError,
 	)
@@ -88,7 +92,7 @@ type ContentStorage interface {
 		filepath, contentType string,
 	) (string, *APIError)
 	GetFile(ctx context.Context, filepath string, headers http.Header) (*File, *APIError)
-	CreatePresignedURL(
+	CreateGetObjectPresignedURL(
 		ctx context.Context,
 		filepath string,
 		expire time.Duration,
@@ -96,8 +100,51 @@ type ContentStorage interface {
 	GetFileWithPresignedURL(
 		ctx context.Context, filepath, signature string, headers http.Header,
 	) (*File, *APIError)
+	PutFileWithPresignedURL(
+		ctx context.Context, filepath, signature string, headers http.Header,
+	) (*httputil.ReverseProxy, *APIError)
 	DeleteFile(ctx context.Context, filepath string) *APIError
 	ListFiles(ctx context.Context) ([]string, *APIError)
+	CreateMultipartUpload(
+		ctx context.Context,
+		filepath string,
+		contentType string,
+	) (string, *APIError)
+	ListParts(
+		ctx context.Context,
+		filepath string,
+		uploadId string,
+	) ([]MultipartFragment, *APIError)
+	UploadPart(
+		ctx context.Context,
+		filepath string,
+		uploadId string,
+		partNumber int32,
+		body io.ReadSeeker,
+	) (string, *APIError)
+	CreatePutObjectPresignedURL(
+		ctx context.Context,
+		filepath string,
+		contentType string,
+		expire time.Duration,
+	) (string, *APIError)
+	CreateUploadPartPresignedURL(
+		ctx context.Context,
+		filepath string,
+		uploadId string,
+		partNumber int32,
+		expire time.Duration,
+	) (string, *APIError)
+	CompleteMultipartUpload(
+		ctx context.Context,
+		filepath string,
+		uploadId string,
+	) (string, *APIError)
+	AbortMultipartUpload(
+		ctx context.Context,
+		filepath string,
+		uploadId string,
+	) *APIError
 }
 
 type Antivirus interface {
@@ -198,6 +245,12 @@ func (ctrl *Controller) SetupRouter(
 		files.GET("/:id/presignedurl", ctrl.GetFilePresignedURL)
 		files.GET("/:id/presignedurl/content", ctrl.GetFileWithPresignedURL)
 		files.GET("/:id/download/:name", ctrl.DownloadFile)
+		files.GET("/:id/multipart", ctrl.GetFileMultipartInfo)
+		files.GET("/:id/multipart/presignedurl", ctrl.GetFileMultipartPresignedURL)
+		files.PUT("/:id/multipart/presignedurl/content", ctrl.UploadFileMultipartWithPresignedURL)
+		files.POST("/multipart", ctrl.CreateFileMultipartUpload)
+		files.POST("/:id/multipart/complete", ctrl.CompleteFileMultipartUpload)
+		files.POST("/:id/multipart/abort", ctrl.AbortFileMultipartUpload)
 	}
 
 	ops := apiRoot.Group("/ops")

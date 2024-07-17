@@ -52,6 +52,7 @@ func (md *BucketMetadataFragment) ToControllerType() controller.BucketMetadata {
 		CreatedAt:            md.GetCreatedAt(),
 		UpdatedAt:            md.GetUpdatedAt(),
 		CacheControl:         *md.GetCacheControl(),
+		UploadExpiration:     int(md.GetUploadExpiration()),
 	}
 }
 
@@ -106,6 +107,11 @@ func (md *FileMetadataFragment) ToControllerType() controller.FileMetadata {
 		ChunkCount = *md.GetChunkCount()
 	}
 
+	UploadID := ""
+	if md.GetUploadID() != nil {
+		UploadID = *md.GetUploadID()
+	}
+
 	return controller.FileMetadata{
 		ID:         ID,
 		Name:       Name,
@@ -120,6 +126,7 @@ func (md *FileMetadataFragment) ToControllerType() controller.FileMetadata {
 		ObjectKey:  ObjectKey,
 		ChunkSize:  ChunkSize,
 		ChunkCount: ChunkCount,
+		UploadID:   UploadID,
 	}
 }
 
@@ -179,7 +186,7 @@ func (h *Hasura) GetBucketByID(
 func (h *Hasura) InitializeFile(
 	ctx context.Context,
 	fileID, name string, size int64, bucketID, mimeType string,
-	objectKey string, chunkSize int64, chunkCount int64,
+	objectKey string, chunkSize int64, chunkCount int64, uploadId string,
 	headers http.Header,
 ) *controller.APIError {
 	if objectKey == "" {
@@ -200,6 +207,7 @@ func (h *Hasura) InitializeFile(
 			ObjectKey:  ptr(objectKey),
 			ChunkSize:  ptr(chunkSize),
 			ChunkCount: ptr(chunkCount),
+			UploadID:   ptr(uploadId),
 		},
 		WithHeaders(headers),
 	)
@@ -214,7 +222,7 @@ func (h *Hasura) InitializeFile(
 func (h *Hasura) PopulateMetadata(
 	ctx context.Context,
 	fileID, name string, size int64, bucketID, etag string, isUploaded bool, mimeType string,
-	objectKey string, chunkSize int64, chunkCount int64,
+	objectKey string, chunkSize int64, chunkCount int64, uploadId string,
 	metadata map[string]any,
 	headers http.Header,
 ) (controller.FileMetadata, *controller.APIError) {
@@ -239,6 +247,7 @@ func (h *Hasura) PopulateMetadata(
 			ObjectKey:  ptr(objectKey),
 			ChunkSize:  ptr(chunkSize),
 			ChunkCount: ptr(chunkCount),
+			UploadID:   ptr(uploadId),
 		},
 		WithHeaders(headers),
 	)
@@ -274,6 +283,29 @@ func (h *Hasura) GetFileByID(
 	}
 
 	return resp.File.ToControllerType(), nil
+}
+
+func (h *Hasura) GetFilesByETag(
+	ctx context.Context,
+	fileETag string,
+	headers http.Header,
+) ([]controller.FileMetadata, *controller.APIError) {
+	resp, err := h.cl.GetFilesByETag(
+		ctx,
+		fileETag,
+		WithHeaders(headers),
+	)
+	if err != nil {
+		aerr := parseGraphqlError(err)
+		return nil, aerr.ExtendError("problem listing files")
+	}
+
+	files := make([]controller.FileMetadata, len(resp.Files))
+	for i, f := range resp.Files {
+		files[i] = f.ToControllerType()
+	}
+
+	return files, nil
 }
 
 func (h *Hasura) SetIsUploaded(
