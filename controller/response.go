@@ -93,3 +93,9 @@ func (r *FileResponse) Write(ctx *gin.Context) {
 		}
 	}
 }
+
+type CommonResponse struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+	Data    any    `json:"data"`
+}

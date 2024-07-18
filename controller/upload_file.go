@@ -339,14 +339,28 @@ func (ctrl *Controller) UploadFile(ctx *gin.Context) {
 	if apiErr != nil {
 		_ = ctx.Error(fmt.Errorf("problem processing request: %w", apiErr))
 
-		ctx.JSON(apiErr.statusCode, UploadFileResponse{filesMetadata, apiErr.PublicResponse()})
+		ctx.JSON(apiErr.statusCode, CommonResponse{
+			Code:    apiErr.statusCode,
+			Message: apiErr.PublicResponse().Message,
+			Data:    filesMetadata,
+		})
 
 		return
 	}
 
 	if newMethod {
-		ctx.JSON(http.StatusCreated, UploadFileResponse{filesMetadata, nil})
+		ctx.JSON(http.StatusCreated,
+			CommonResponse{
+				http.StatusCreated,
+				"ok",
+				filesMetadata,
+			},
+		)
 	} else {
-		ctx.JSON(http.StatusCreated, filesMetadata[0])
+		ctx.JSON(http.StatusCreated, CommonResponse{
+			http.StatusCreated,
+			"ok",
+			filesMetadata[0],
+		})
 	}
 }

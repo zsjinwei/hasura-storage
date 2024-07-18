@@ -13,11 +13,6 @@ type updateFileMetadata struct {
 	Metadata map[string]any `json:"metadata"`
 }
 
-type UpdateFileResponse struct {
-	*FileMetadata
-	Error *ErrorResponse `json:"error,omitempty"`
-}
-
 func updateFileParseRequest(ctx *gin.Context) (fileData, *APIError) {
 	res := fileData{
 		ID: ctx.Param("id"),
@@ -156,10 +151,19 @@ func (ctrl *Controller) UpdateFile(ctx *gin.Context) {
 		ctx.Header("X-Error", apiErr.publicMessage)
 		ctx.AbortWithStatus(apiErr.statusCode)
 
-		ctx.JSON(apiErr.statusCode, UpdateFileResponse{nil, apiErr.PublicResponse()})
+		ctx.JSON(apiErr.statusCode, CommonResponse{
+			Code:    apiErr.statusCode,
+			Message: apiErr.PublicResponse().Message,
+		})
 
 		return
 	}
 
-	ctx.JSON(http.StatusOK, UpdateFileResponse{&metadata, nil})
+	ctx.JSON(http.StatusOK,
+		CommonResponse{
+			http.StatusOK,
+			"ok",
+			metadata,
+		},
+	)
 }

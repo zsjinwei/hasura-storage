@@ -164,6 +164,7 @@ func TestUploadFile(t *testing.T) {
 					file.md.ID,
 					int64(len(file.contents)),
 					int64(1),
+					"",
 					gomock.Any(),
 				).Return(nil)
 
@@ -188,6 +189,7 @@ func TestUploadFile(t *testing.T) {
 					file.md.ID,
 					int64(len(file.contents)),
 					int64(1),
+					"",
 					file.md.Metadata,
 					gomock.Any(),
 				).Return(
@@ -224,6 +226,7 @@ func TestUploadFile(t *testing.T) {
 					file.md.ID,
 					int64(len(file.contents)),
 					int64(1),
+					"",
 					gomock.Any(),
 				).Return(nil)
 
@@ -248,6 +251,7 @@ func TestUploadFile(t *testing.T) {
 					file.md.ID,
 					int64(len(file.contents)),
 					int64(1),
+					"",
 					file.md.Metadata,
 					gomock.Any(),
 				).Return(

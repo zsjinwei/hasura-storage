@@ -10,9 +10,8 @@ import (
 )
 
 type GetFilePresignedURLResponse struct {
-	Error      *ErrorResponse `json:"error,omitempty"`
-	URL        string         `json:"url,omitempty"`
-	Expiration int            `json:"expiration,omitempty"`
+	URL        string `json:"url,omitempty"`
+	Expiration int    `json:"expiration,omitempty"`
 }
 
 type GetFilePresignedURLRequest struct {
@@ -65,7 +64,7 @@ func (ctrl *Controller) getFilePresignedURL(
 		"%s%s/files/%s/presignedurl/content?%s",
 		ctrl.publicURL, ctrl.apiRootPrefix, fileMetadata.ID, signature,
 	)
-	return GetFilePresignedURLResponse{nil, url, bucketMetadata.DownloadExpiration}, nil
+	return GetFilePresignedURLResponse{url, bucketMetadata.DownloadExpiration}, nil
 }
 
 func (ctrl *Controller) GetFilePresignedURL(ctx *gin.Context) {
@@ -73,10 +72,17 @@ func (ctrl *Controller) GetFilePresignedURL(ctx *gin.Context) {
 	if apiErr != nil {
 		_ = ctx.Error(apiErr)
 
-		ctx.JSON(apiErr.statusCode, GetFilePresignedURLResponse{Error: apiErr.PublicResponse()})
+		ctx.JSON(apiErr.statusCode, CommonResponse{
+			Code:    apiErr.statusCode,
+			Message: apiErr.PublicResponse().Message,
+		})
 
 		return
 	}
 
-	ctx.JSON(http.StatusOK, resp)
+	ctx.JSON(http.StatusOK, CommonResponse{
+		http.StatusOK,
+		"ok",
+		resp,
+	})
 }

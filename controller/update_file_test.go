@@ -147,6 +147,7 @@ func TestUpdateFile(t *testing.T) {
 				file.md.ID,
 				int64(len(file.contents)),
 				int64(1),
+				"",
 				file.md.Metadata,
 				gomock.Any(),
 			).Return(
@@ -203,12 +204,14 @@ func TestUpdateFile(t *testing.T) {
 
 			assert(t, 200, responseRecorder.Code)
 
-			resp := &controller.UpdateFileResponse{}
+			resp := &controller.CommonResponse{}
 			if err := json.Unmarshal(responseRecorder.Body.Bytes(), &resp); err != nil {
 				t.Fatal(err)
 			}
-			assert(t, &controller.UpdateFileResponse{
-				&controller.FileMetadata{
+			assert(t, &controller.CommonResponse{
+				Code:    200,
+				Message: "ok",
+				Data: controller.FileMetadata{
 					ID:               "38288c85-02af-416b-b075-11c4dae9",
 					Name:             "a_file.txt",
 					Size:             12,
@@ -225,7 +228,6 @@ func TestUpdateFile(t *testing.T) {
 					ChunkCount:       int64(1),
 					UploadID:         "",
 				},
-				nil,
 			}, resp,
 				cmpopts.IgnoreFields(controller.FileMetadata{}, "ID", "CreatedAt", "UpdatedAt"),
 			)

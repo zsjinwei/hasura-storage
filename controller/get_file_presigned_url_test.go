@@ -137,9 +137,7 @@ func TestGetFilePresignedURL(t *testing.T) {
 					Expiration: 30,
 				})
 			} else {
-				assert(t, resp, &controller.GetFilePresignedURLResponse{
-					Error: &controller.ErrorResponse{Message: "file not found"},
-				})
+				assert(t, resp, &controller.GetFilePresignedURLResponse{})
 			}
 		})
 	}

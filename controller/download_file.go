@@ -16,11 +16,6 @@ type downloadFileRequest struct {
 	headers  getFileInformationHeaders
 }
 
-// Only used if the request fails.
-type DownloadFileResponse struct {
-	Error *ErrorResponse `json:"error"`
-}
-
 func (ctrl *Controller) downloadFileParse(ctx *gin.Context) (downloadFileRequest, *APIError) {
 	var headers getFileInformationHeaders
 	if err := ctx.ShouldBindHeader(&headers); err != nil {
@@ -96,7 +91,10 @@ func (ctrl *Controller) DownloadFile(ctx *gin.Context) {
 	if apiErr != nil {
 		_ = ctx.Error(apiErr)
 
-		ctx.JSON(apiErr.statusCode, DownloadFileResponse{apiErr.PublicResponse()})
+		ctx.JSON(apiErr.statusCode, CommonResponse{
+			Code:    apiErr.statusCode,
+			Message: apiErr.PublicResponse().Message,
+		})
 
 		return
 	}

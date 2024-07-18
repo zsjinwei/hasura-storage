@@ -11,12 +11,6 @@ import (
 	"github.com/google/uuid"
 )
 
-// this type is used to ensure we respond consistently no matter the case.
-type CreateFileMultipartUploadResponse struct {
-	Files []FileMetadata `json:"files,omitempty"`
-	Error *ErrorResponse `json:"error,omitempty"`
-}
-
 type fileMultipartUploadData struct {
 	Size        int64  `json:"size"`
 	ChunkSize   int64  `json:"chunkSize"`
@@ -146,10 +140,17 @@ func (ctrl *Controller) CreateFileMultipartUpload(ctx *gin.Context) {
 	if apiErr != nil {
 		_ = ctx.Error(fmt.Errorf("problem processing request: %w", apiErr))
 
-		ctx.JSON(apiErr.statusCode, CreateFileMultipartUploadResponse{filesMetadatas, apiErr.PublicResponse()})
+		ctx.JSON(apiErr.statusCode, CommonResponse{
+			Code:    apiErr.statusCode,
+			Message: apiErr.PublicResponse().Message,
+		})
 
 		return
 	}
 
-	ctx.JSON(http.StatusOK, CreateFileMultipartUploadResponse{filesMetadatas, nil})
+	ctx.JSON(http.StatusOK, CommonResponse{
+		http.StatusOK,
+		"ok",
+		filesMetadatas,
+	})
 }

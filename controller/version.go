@@ -19,8 +19,12 @@ type VersionResponse struct {
 func (ctrl *Controller) Version(ctx *gin.Context) {
 	ctx.JSON(
 		http.StatusOK,
-		VersionResponse{
-			BuildVersion: buildVersion,
+		CommonResponse{
+			http.StatusOK,
+			"ok",
+			VersionResponse{
+				BuildVersion: buildVersion,
+			},
 		},
 	)
 }

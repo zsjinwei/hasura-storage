@@ -23,17 +23,17 @@ type MultipartFragment struct {
 	Size int64 `json:"size"`
 }
 
-type GetFileMultipartInfoRequest struct {
+type GetFileMultipartUploadInfoRequest struct {
 	FileID   string
 	FileETag string
 }
 
-type GetFileMultipartInfoResponse struct {
+type GetFileMultipartUploadInfoResponse struct {
 	*FileMetadata
 	Parts []MultipartFragment `json:"parts"`
 }
 
-func (ctrl *Controller) getFileMultipartInfoParse(ctx *gin.Context) GetFileMultipartInfoRequest {
+func (ctrl *Controller) getFileMultipartUploadInfoParse(ctx *gin.Context) GetFileMultipartUploadInfoRequest {
 	etag := ctx.Query("etag")
 	if !strings.HasPrefix(etag, "\"") {
 		etag = "\"" + etag
@@ -41,7 +41,7 @@ func (ctrl *Controller) getFileMultipartInfoParse(ctx *gin.Context) GetFileMulti
 	if !strings.HasSuffix(etag, "\"") {
 		etag = etag + "\""
 	}
-	return GetFileMultipartInfoRequest{
+	return GetFileMultipartUploadInfoRequest{
 		FileID:   ctx.Param("id"),
 		FileETag: etag,
 	}
@@ -65,26 +65,26 @@ func (ctrl *Controller) getFileMetadataByETag(
 	return fileMetadatas[0], nil
 }
 
-func (ctrl *Controller) getFileMultipartInfoProcess(
+func (ctrl *Controller) getFileMultipartUploadInfoProcess(
 	ctx *gin.Context,
-) (GetFileMultipartInfoResponse, *APIError) {
-	req := ctrl.getFileMultipartInfoParse(ctx)
+) (GetFileMultipartUploadInfoResponse, *APIError) {
+	req := ctrl.getFileMultipartUploadInfoParse(ctx)
 
 	if req.FileID == "" {
-		return GetFileMultipartInfoResponse{}, BadDataError(errors.New("parameter id must be not empty"), "parameter id must be not empty")
+		return GetFileMultipartUploadInfoResponse{}, BadDataError(errors.New("parameter id must be not empty"), "parameter id must be not empty")
 	}
 
 	fileMetadata := FileMetadata{}
 
 	if req.FileID == "etag" {
 		if req.FileETag == "" {
-			return GetFileMultipartInfoResponse{}, BadDataError(errors.New("query parameter etag must be not empty"), "query parameter etag must be not empty")
+			return GetFileMultipartUploadInfoResponse{}, BadDataError(errors.New("query parameter etag must be not empty"), "query parameter etag must be not empty")
 		}
 		fm, apiErr := ctrl.getFileMetadataByETag(
 			ctx.Request.Context(), req.FileETag, ctx.Request.Header,
 		)
 		if apiErr != nil {
-			return GetFileMultipartInfoResponse{}, apiErr
+			return GetFileMultipartUploadInfoResponse{}, apiErr
 		}
 
 		fileMetadata = fm
@@ -93,7 +93,7 @@ func (ctrl *Controller) getFileMultipartInfoProcess(
 			ctx.Request.Context(), req.FileID, false, ctx.Request.Header,
 		)
 		if apiErr != nil {
-			return GetFileMultipartInfoResponse{}, apiErr
+			return GetFileMultipartUploadInfoResponse{}, apiErr
 		}
 
 		fileMetadata = fm
@@ -104,27 +104,34 @@ func (ctrl *Controller) getFileMultipartInfoProcess(
 		objectKey = fileMetadata.ID
 	}
 
-	resp := GetFileMultipartInfoResponse{&fileMetadata, nil}
+	resp := GetFileMultipartUploadInfoResponse{&fileMetadata, nil}
 
 	if fileMetadata.UploadID != "" {
 		parts, err := ctrl.contentStorage.ListParts(ctx, objectKey, fileMetadata.UploadID)
 		if err != nil {
-			return GetFileMultipartInfoResponse{}, err
+			return GetFileMultipartUploadInfoResponse{}, err
 		}
 		resp.Parts = parts
 	}
 	return resp, nil
 }
 
-func (ctrl *Controller) GetFileMultipartInfo(ctx *gin.Context) {
-	resp, apiErr := ctrl.getFileMultipartInfoProcess(ctx)
+func (ctrl *Controller) GetFileMultipartUploadInfo(ctx *gin.Context) {
+	resp, apiErr := ctrl.getFileMultipartUploadInfoProcess(ctx)
 	if apiErr != nil {
 		_ = ctx.Error(apiErr)
 
-		ctx.JSON(apiErr.statusCode, apiErr.PublicResponse())
+		ctx.JSON(apiErr.statusCode, CommonResponse{
+			Code:    apiErr.statusCode,
+			Message: apiErr.PublicResponse().Message,
+		})
 
 		return
 	}
 
-	ctx.JSON(http.StatusOK, resp)
+	ctx.JSON(http.StatusOK, CommonResponse{
+		http.StatusOK,
+		"ok",
+		resp,
+	})
 }

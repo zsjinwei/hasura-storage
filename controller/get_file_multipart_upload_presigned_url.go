@@ -10,9 +10,8 @@ import (
 )
 
 type GetFileMultipartUploadPresignedURLResponse struct {
-	Error      *ErrorResponse `json:"error,omitempty"`
-	URLs       []string       `json:"urls,omitempty"`
-	Expiration int            `json:"expiration,omitempty"`
+	URLs       []string `json:"urls,omitempty"`
+	Expiration int      `json:"expiration,omitempty"`
 }
 
 type GetFileMultipartUploadPresignedURLRequest struct {
@@ -80,7 +79,7 @@ func (ctrl *Controller) getFileMultipartUploadPresignedURL(
 		urls = append(urls, url)
 	}
 
-	return GetFileMultipartUploadPresignedURLResponse{nil, urls, bucketMetadata.UploadExpiration}, nil
+	return GetFileMultipartUploadPresignedURLResponse{urls, bucketMetadata.UploadExpiration}, nil
 }
 
 func (ctrl *Controller) GetFileMultipartPresignedURL(ctx *gin.Context) {
@@ -88,10 +87,17 @@ func (ctrl *Controller) GetFileMultipartPresignedURL(ctx *gin.Context) {
 	if apiErr != nil {
 		_ = ctx.Error(apiErr)
 
-		ctx.JSON(apiErr.statusCode, GetFileMultipartUploadPresignedURLResponse{Error: apiErr.PublicResponse()})
+		ctx.JSON(apiErr.statusCode, CommonResponse{
+			Code:    apiErr.statusCode,
+			Message: apiErr.PublicResponse().Message,
+		})
 
 		return
 	}
 
-	ctx.JSON(http.StatusOK, resp)
+	ctx.JSON(http.StatusOK, CommonResponse{
+		http.StatusOK,
+		"ok",
+		resp,
+	})
 }

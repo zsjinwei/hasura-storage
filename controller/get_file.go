@@ -14,11 +14,6 @@ import (
 	"github.com/nhost/hasura-storage/image"
 )
 
-// Only used if the request fails.
-type GetFileResponse struct {
-	Error *ErrorResponse `json:"error"`
-}
-
 func getQueryInt(ctx *gin.Context, param string) (int, *APIError) {
 	s, ok := ctx.GetQuery(param)
 	if !ok {
@@ -247,7 +242,10 @@ func (ctrl *Controller) GetFile(ctx *gin.Context) {
 	if apiErr != nil {
 		_ = ctx.Error(apiErr)
 
-		ctx.JSON(apiErr.statusCode, GetFileResponse{apiErr.PublicResponse()})
+		ctx.JSON(apiErr.statusCode, CommonResponse{
+			Code:    apiErr.statusCode,
+			Message: apiErr.PublicResponse().Message,
+		})
 
 		return
 	}

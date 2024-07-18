@@ -7,11 +7,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// this type is used to ensure we respond consistently no matter the case.
-type AbortFileMultipartUploadResponse struct {
-	Error *ErrorResponse `json:"error,omitempty"`
-}
-
 type abortFileMultipartUploadRequest struct {
 	FileID string
 }
@@ -70,10 +65,17 @@ func (ctrl *Controller) AbortFileMultipartUpload(ctx *gin.Context) {
 	if apiErr != nil {
 		_ = ctx.Error(fmt.Errorf("problem processing request: %w", apiErr))
 
-		ctx.JSON(apiErr.statusCode, AbortFileMultipartUploadResponse{apiErr.PublicResponse()})
+		ctx.JSON(apiErr.statusCode, CommonResponse{
+			Code:    apiErr.statusCode,
+			Message: apiErr.PublicResponse().Message,
+		})
 
 		return
 	}
 
-	ctx.JSON(http.StatusOK, AbortFileMultipartUploadResponse{nil})
+	ctx.JSON(http.StatusOK, CommonResponse{
+		http.StatusOK,
+		"ok",
+		nil,
+	})
 }

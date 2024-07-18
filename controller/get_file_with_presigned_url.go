@@ -110,9 +110,6 @@ func (ctrl *Controller) getFileWithPresignedURL(ctx *gin.Context) (*FileResponse
 			ctx.Request.Header,
 		)
 	}
-	if apiErr != nil {
-		return nil, apiErr
-	}
 
 	return ctrl.processFileToDownload(
 		ctx,
@@ -128,7 +125,10 @@ func (ctrl *Controller) GetFileWithPresignedURL(ctx *gin.Context) {
 	if apiErr != nil {
 		_ = ctx.Error(apiErr)
 
-		ctx.JSON(apiErr.statusCode, GetFileResponse{apiErr.PublicResponse()})
+		ctx.JSON(apiErr.statusCode, CommonResponse{
+			Code:    apiErr.statusCode,
+			Message: apiErr.PublicResponse().Message,
+		})
 
 		return
 	}

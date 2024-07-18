@@ -245,7 +245,7 @@ func (ctrl *Controller) SetupRouter(
 		files.GET("/:id/presignedurl", ctrl.GetFilePresignedURL)
 		files.GET("/:id/presignedurl/content", ctrl.GetFileWithPresignedURL)
 		files.GET("/:id/download/:name", ctrl.DownloadFile)
-		files.GET("/:id/multipart", ctrl.GetFileMultipartInfo)
+		files.GET("/:id/multipart", ctrl.GetFileMultipartUploadInfo)
 		files.GET("/:id/multipart/presignedurl", ctrl.GetFileMultipartPresignedURL)
 		files.PUT("/:id/multipart/presignedurl/content", ctrl.UploadFileMultipartWithPresignedURL)
 		files.POST("/multipart", ctrl.CreateFileMultipartUpload)

@@ -49,15 +49,22 @@ func (ctrl *Controller) ListOrphans(ctx *gin.Context) {
 	if apiErr != nil {
 		_ = ctx.Error(fmt.Errorf("problem processing request: %w", apiErr))
 
-		ctx.JSON(apiErr.statusCode, apiErr.PublicResponse())
+		ctx.JSON(apiErr.statusCode, CommonResponse{
+			Code:    apiErr.statusCode,
+			Message: apiErr.PublicResponse().Message,
+		})
 
 		return
 	}
 
 	ctx.JSON(
 		http.StatusOK,
-		ListOrphansResponse{
-			files,
+		CommonResponse{
+			http.StatusOK,
+			"ok",
+			ListOrphansResponse{
+				files,
+			},
 		},
 	)
 }
