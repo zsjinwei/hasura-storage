@@ -102,10 +102,15 @@ func (ctrl *Controller) getFileWithPresignedURL(ctx *gin.Context) (*FileResponse
 		return nil, apiErr
 	}
 
+	objectKey := fileMetadata.ObjectKey
+	if objectKey == "" {
+		objectKey = fileMetadata.ID
+	}
+
 	downloadFunc := func() (*File, *APIError) {
 		return ctrl.contentStorage.GetFileWithPresignedURL(
 			ctx.Request.Context(),
-			req.fileID,
+			objectKey,
 			req.signature,
 			ctx.Request.Header,
 		)
